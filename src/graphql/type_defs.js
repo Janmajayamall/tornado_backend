@@ -6,6 +6,7 @@ module.exports = gql`
         test: String
     }
 
+    #user info type
     type User {
         _id:ID!,
         username:String!,
@@ -30,11 +31,21 @@ module.exports = gql`
         password:String!
     }
 
+    # Mutation room_input input
+    input room_input {
+        _id:ID!,
+        name:String!,
+        status:String!
+    }
+
     type Mutation {
 
         #user
         register_user(user_input:register_user_input):User!,
         login_user(user_input:login_user_input):User!
+
+        #rooms
+        create_room(room_input:room_input)
         
     }
 

@@ -1,7 +1,9 @@
+const db_structure = require("./../db_structure")
+
 // user
 
 async function create_user_collection(main_db){
-    var result = await main_db.createCollection("users", {
+    var result = await main_db.createCollection(db_structure.dev1.collections.users, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -16,11 +18,11 @@ async function create_user_collection(main_db){
                         description:"password must be a string and is required"
                     },
                     timestamp:{
-                        bsonType:"string",
+                        bsonType:"date",
                         description:"timestamp must be a date(ISODate) and is required"
                     },
                     last_modified:{
-                        bsonType:"string",
+                        bsonType:"date",
                         description:"last_modified must be a date(ISODate) and is required"
                     }
                 }
@@ -33,7 +35,7 @@ async function create_user_collection(main_db){
 
 //user_account
 async function create_user_account_collection(main_db){
-    var result = await main_db.createCollection("user_accounts", {
+    var result = await main_db.createCollection(db_structure.dev1.collections.user_accounts, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -72,7 +74,7 @@ async function create_user_account_collection(main_db){
 
 //room
 async function create_room_collection(main_db){
-    var result = await main_db.createCollection("rooms", {
+    var result = await main_db.createCollection(db_structure.dev1.collections.rooms, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -107,7 +109,7 @@ async function create_room_collection(main_db){
 
 //room follow
 async function create_room_follow_collection(main_db){
-    var result = await main_db.createCollection("room_follows", {
+    var result = await main_db.createCollection(db_structure.dev1.collections.room_follows, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -141,7 +143,7 @@ async function create_room_follow_collection(main_db){
 }
 
 async function create_post_collection(main_db){
-    var result = await main_db.createCollection("posts", {
+    var result = await main_db.createCollection(db_structure.dev1.collections.posts, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -188,7 +190,7 @@ async function create_post_collection(main_db){
 
 //likes
 async function create_likes_collection(main_db){
-    var result = await main_db.createCollection("likes", {
+    var result = await main_db.createCollection(db_structure.dev1.collections.likes, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -223,7 +225,7 @@ async function create_likes_collection(main_db){
 
 //comments 
 async function create_comments_collection(main_db){
-    var result = await main_db.createCollection("comments", {
+    var result = await main_db.createCollection(db_structure.dev1.collections.comments, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",

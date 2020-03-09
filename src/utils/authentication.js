@@ -47,13 +47,20 @@ async function issue_jwt(user){
 
     const signed_jwt = jsonwebtoken.sign(payload, PRIV_KEY, {expiresIn: expires_in, algorithm: "RS256"})
 
-    return {
-        token: `Bearer ${signed_jwt}`,
-        expires:expires_in
-    }
+    return `Bearer ${signed_jwt}`
 }
 
 async function verify_jwt(jwt){
+
+    const token = jwt.split(" ")[1]
+
+    if (token === null){
+        throw new AuthenticationError("JWT malformed", {
+            error:{
+                jwt: "JWT is malformed/incorrect"
+            }
+        })
+    }
 
     jsonwebtoken.verify(jwt, PUB_KEY, {ignoreExpiration:true, algorithms:["RS256"]}, (err, payload)=>{
         
@@ -72,6 +79,7 @@ async function verify_jwt(jwt){
         return payload.sub
 
     })
+    
 
 }
 

@@ -4,22 +4,22 @@ const {ApolloServer, gql} = require("apollo-server-express")
 const collections = require("./dbs/schema/collections") 
 const type_defs = require("./src/graphql/type_defs")
 const resolvers = require("./src/graphql/resolvers.js/index")
+const db_structure = require("./dbs/db_structure")
 
 
 //connecting to the database
 let mongodb_connections
 let dbs = {
-    main_db:null
 }
 
 initialising_mongodb.connect_all_db().then(async database_connections => {
+
     mongodb_connections = database_connections
     console.log(mongodb_connections)
 
     //configuring dbs
-    dbs.main_db = mongodb_connections.main_connection.db("dev1")
+    dbs.main_db = mongodb_connections.main_connection.db(db_structure.dev1.name)
   
-    
     //setting up collection in main_db
     await collections.create_user_collection(dbs.main_db)
     await collections.create_user_account_collection(dbs.main_db)
