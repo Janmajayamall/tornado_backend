@@ -180,6 +180,9 @@ async function create_post_collection(main_db){
                     status:{
                         enum:["ACTIVE", "NOT_ACTIVE"],
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
+                    },
+                    post_type:{
+                        enum:["NORMAL", "GUESS"]
                     }
                 }
             }
@@ -194,7 +197,7 @@ async function create_likes_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["user_id", "timestamp", "status", "last_modified", "like_type"],
+                required:["user_id", "timestamp", "status", "last_modified", "like_type", "content_id"],
                 properties:{
                     user_id:{
                         bsonType:"objectId",
@@ -215,6 +218,10 @@ async function create_likes_collection(main_db){
                     like_type:{
                         enum:["POST", "COMMENT"],
                         description:"like_type must be POST or COMMENT and is required"
+                    },
+                    content_id:{
+                        bsonType:"objectId",
+                        description:"content_id must be a objectId and is required"
                     }
                 }
             }

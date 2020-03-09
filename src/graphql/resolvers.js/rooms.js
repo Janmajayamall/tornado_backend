@@ -44,11 +44,26 @@ module.exports = {
                 throw new Error("Database Error: main_db instance is null")
             }
 
+            const follow_room_object = args.user_input
             //TODO: validating the input
 
             //following the room
+            const result = mongodb_room_queries.follow_room(context.db_structure, follow_room_object)
+            return result
+        },
 
+        async unfollow_room(parent, args, context){
 
+            //checking for db instance in the context
+            if (!context.db_structure.main_db.db_instance){
+                throw new Error("Database Error: main_db instance is null")
+            }
+
+            const follow_room_object = args.user_input
+
+            //following the room
+            const result = await mongodb_room_queries.unfollow_room(context.db_structure, follow_room_object)
+            return result
         },
 
         async reactivate_room(parent, args, context){
