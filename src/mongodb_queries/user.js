@@ -1,29 +1,20 @@
 const auth_utils = require("./../utils/authentication")
 const {UserInputError, ApolloError, AuthenticationError} = require("apollo-server-express")
 const {get_insert_one_result} = require("../utils/mongo_queries")
-const db_structure = require("./../../dbs/db_structure")
 
-async function register_user(dbs,  user_object){
+async function register_user(db_structure,  user_object){
 
         //query for checking whether user_object exists or not
-        let email_check = await dbs.main_db.collection(db_structure.dev1.collections.users).findOne({"email":user_object.email})
+        let email_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOne({"email":user_object.email})
         if (email_check){
-            throw new UserInputError("email already exists", {
-                error:{
-                    email:"email already taken"
-                }
-            })
+            throw new UserInputError(`emailId:${user_object.email} already exists`)
         }
 
         //generating password hash
         const hash = await auth_utils.generate_password_hash(user_object.password)
         
         if (hash === null){
-            throw new ApolloError("hash generated is null", {
-                error:{
-                    password: "Not able to generate hash for the password"
-                }
-            })
+            throw new ApolloError("hash generated is null")
         }
         
         //query mongodb for registering the user
@@ -33,7 +24,7 @@ async function register_user(dbs,  user_object){
             timestamp: new Date(),    
             last_modified: new Date()
         } //populating user_object for required fields 
-        let result_user = await dbs.main_db.collection(db_structure.dev1.collections.users).insertOne(user_value) //inserting into collection users
+        let result_user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).insertOne(user_value) //inserting into collection users
         result_user = get_insert_one_result(result_user)
         
         let user_id = result_user._id  // getting user_id from user collection 
@@ -47,7 +38,7 @@ async function register_user(dbs,  user_object){
             last_modified: new Date()
 
         } //populating user_account_object with user_id and other required fields
-        let result_user_account = await dbs.main_db.collection(db_structure.dev1.collections.user_accounts).insertOne(user_account_value) // inserting into collection user_accounts
+        let result_user_account = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).insertOne(user_account_value) // inserting into collection user_accounts
         result_user_account = get_insert_one_result(result_user_account)
 
         //Generate jwt
@@ -61,10 +52,10 @@ async function register_user(dbs,  user_object){
 
 }
 
-async function login_user(dbs, user_object){
+async function login_user(db_structure, user_object){
 
         //finding corresponding user
-        let user = await dbs.main_db.collection(db_structure.dev1.collections.users).findOne({"email":user_object.email})
+        let user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOne({"email":user_object.email})
 
         //checking whether user exists
         if (!user){
@@ -85,7 +76,7 @@ async function login_user(dbs, user_object){
         let jwt = auth_utils.issue_jwt(user)
 
         //getting user info
-        let user_info = await dbs.main_db.collection(db_structure.dev1.collections.user_accounts).findOne({user_id:user._id})
+        let user_info = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).findOne({user_id:user._id})
 
         return{
             ...user_info,

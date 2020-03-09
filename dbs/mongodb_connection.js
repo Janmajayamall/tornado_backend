@@ -12,7 +12,7 @@ function connect(url){
         Logger.setLevel("error")
         Logger.setLevel("info")
         Logger.setCurrentLogger(function(msg, context){
-            console.log(msg, context, "Mongdb Logger")
+            console.log(msg, context, "MongDb Logger")
         })
         return client
     })

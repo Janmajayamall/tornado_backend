@@ -31,10 +31,30 @@ module.exports = gql`
         password:String!
     }
 
-    # Mutation room_input input
-    input room_input {
+    # room info type
+    type Room {
         _id:ID!,
         name:String!,
+        status:String!
+    }
+
+    # Mutation room input type  TODO:You might want to change status to ENUM from String
+    input room_input {
+        name:String!,
+        status:String!,
+        creator_id:ID!,
+    }
+
+    type Follow_room {
+        room_id:ID!,
+        follower_id:ID!,
+        status:String!
+    }
+
+    # Mutation follow_room input
+    input follow_room_input {
+        room_id:ID!,
+        follower_id:ID!,
         status:String!
     }
 
@@ -42,11 +62,16 @@ module.exports = gql`
 
         #user
         register_user(user_input:register_user_input):User!,
-        login_user(user_input:login_user_input):User!
+        login_user(user_input:login_user_input):User!,
 
         #rooms
-        create_room(room_input:room_input)
+        create_room(user_input:room_input):Room!,
+        deactivate_room(_id:ID!):Room!,
+        follow_room(user_input:follow_room_input):Follow_room!,
+        reactivate_room(_id:ID!):Room!
         
+
+
     }
 
 

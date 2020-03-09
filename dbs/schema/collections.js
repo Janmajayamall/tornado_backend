@@ -3,7 +3,7 @@ const db_structure = require("./../db_structure")
 // user
 
 async function create_user_collection(main_db){
-    var result = await main_db.createCollection(db_structure.dev1.collections.users, {
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.users, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -35,7 +35,7 @@ async function create_user_collection(main_db){
 
 //user_account
 async function create_user_account_collection(main_db){
-    var result = await main_db.createCollection(db_structure.dev1.collections.user_accounts, {
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.user_accounts, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -74,7 +74,7 @@ async function create_user_account_collection(main_db){
 
 //room
 async function create_room_collection(main_db){
-    var result = await main_db.createCollection(db_structure.dev1.collections.rooms, {
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.rooms, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -109,7 +109,7 @@ async function create_room_collection(main_db){
 
 //room follow
 async function create_room_follow_collection(main_db){
-    var result = await main_db.createCollection(db_structure.dev1.collections.room_follows, {
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.room_follows, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -143,7 +143,7 @@ async function create_room_follow_collection(main_db){
 }
 
 async function create_post_collection(main_db){
-    var result = await main_db.createCollection(db_structure.dev1.collections.posts, {
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.posts, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -190,7 +190,7 @@ async function create_post_collection(main_db){
 
 //likes
 async function create_likes_collection(main_db){
-    var result = await main_db.createCollection(db_structure.dev1.collections.likes, {
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.likes, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
@@ -225,7 +225,7 @@ async function create_likes_collection(main_db){
 
 //comments 
 async function create_comments_collection(main_db){
-    var result = await main_db.createCollection(db_structure.dev1.collections.comments, {
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.comments, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",

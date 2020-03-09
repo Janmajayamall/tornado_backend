@@ -55,11 +55,7 @@ async function verify_jwt(jwt){
     const token = jwt.split(" ")[1]
 
     if (token === null){
-        throw new AuthenticationError("JWT malformed", {
-            error:{
-                jwt: "JWT is malformed/incorrect"
-            }
-        })
+        throw new AuthenticationError("JWT malformed")
     }
 
     jsonwebtoken.verify(jwt, PUB_KEY, {ignoreExpiration:true, algorithms:["RS256"]}, (err, payload)=>{
@@ -69,17 +65,13 @@ async function verify_jwt(jwt){
         }
 
         if (err.name === "JsonWebTokenError"){
-            throw new AuthenticationError("JWT malformed", {
-                error:{
-                    jwt:"JWT is malformed/incorrect"
-                }
-            })
+            throw new AuthenticationError("JWT malformed")
         }
         
         return payload.sub
 
     })
-    
+
 
 }
 

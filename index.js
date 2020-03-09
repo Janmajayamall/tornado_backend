@@ -9,8 +9,7 @@ const db_structure = require("./dbs/db_structure")
 
 //connecting to the database
 let mongodb_connections
-let dbs = {
-}
+
 
 initialising_mongodb.connect_all_db().then(async database_connections => {
 
@@ -18,16 +17,16 @@ initialising_mongodb.connect_all_db().then(async database_connections => {
     console.log(mongodb_connections)
 
     //configuring dbs
-    dbs.main_db = mongodb_connections.main_connection.db(db_structure.dev1.name)
+    db_structure.main_db.db_instance = mongodb_connections.main_connection.db(db_structure.main_db.name)
   
     //setting up collection in main_db
-    await collections.create_user_collection(dbs.main_db)
-    await collections.create_user_account_collection(dbs.main_db)
-    await collections.create_room_collection(dbs.main_db)
-    await collections.create_room_follow_collection(dbs.main_db)
-    await collections.create_post_collection(dbs.main_db)
-    await collections.create_likes_collection(dbs.main_db)
-    await collections.create_comments_collection(dbs.main_db)
+    await collections.create_user_collection(db_structure)
+    await collections.create_user_account_collection(db_structure)
+    await collections.create_room_collection(db_structure)
+    await collections.create_room_follow_collection(db_structure)
+    await collections.create_post_collection(db_structure)
+    await collections.create_likes_collection(db_structure)
+    await collections.create_comments_collection(db_structure)
     
 })
 
@@ -41,7 +40,7 @@ const app = express()
 const server = new ApolloServer({
     typeDefs:type_defs,
     resolvers:resolvers,
-    context:()=>({dbs:dbs})
+    context:()=>({db_structure:db_structure})
 })
 server.applyMiddleware({app})
 
