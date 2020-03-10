@@ -24,7 +24,7 @@ initialising_mongodb.connect_all_db().then(async database_connections => {
     await collections.create_user_account_collection(db_structure)
     await collections.create_room_collection(db_structure)
     await collections.create_room_follow_collection(db_structure)
-    await collections.create_post_collection(db_structure)
+    await collections.create_room_post_collection(db_structure)
     await collections.create_likes_collection(db_structure)
     await collections.create_comments_collection(db_structure)
     

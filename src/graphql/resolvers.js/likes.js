@@ -1,4 +1,4 @@
-const mongodb_room_queries = require("./../../mongodb_queries/like")
+const mongodb_like_queries = require("./../../mongodb_queries/like")
 const {} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 
@@ -15,8 +15,8 @@ module.exports = {
             const like_object = args.user_input
             //TODO:Validate the input
 
-
-
+            const result = await mongodb_like_queries.create_like(context.db_structure, like_object)
+            return result
         },
 
         async unlike_content(parent, args, context){
@@ -29,7 +29,8 @@ module.exports = {
             const like_object = args.user_input
             //TODO:Validate the input
             
-
+            const result = await mongodb_like_queries.unlike_content(context.db_structure, like_object)
+            return result
     
         },
 

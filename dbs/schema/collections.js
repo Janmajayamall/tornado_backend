@@ -142,12 +142,12 @@ async function create_room_follow_collection(main_db){
     return result
 }
 
-async function create_post_collection(main_db){
-    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.posts, {
+async function create_room_post_collection(main_db){
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.room_posts, {
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["creator_id", "description", "timestamp", "last_modified", "status"],
+                required:["creator_id", "timestamp", "last_modified", "status", "room_ids"],
                 properties:{
                     creator_id:{
                         bsonType:"objectId",
@@ -181,15 +181,13 @@ async function create_post_collection(main_db){
                         enum:["ACTIVE", "NOT_ACTIVE"],
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
                     },
-                    post_type:{
-                        enum:["NORMAL", "GUESS"]
-                    }
                 }
             }
         }
     })
     return result
 }
+
 
 //likes
 async function create_likes_collection(main_db){
@@ -216,7 +214,7 @@ async function create_likes_collection(main_db){
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
                     },
                     like_type:{
-                        enum:["POST", "COMMENT"],
+                        enum:["ROOM_POST", "COMMENT"],
                         description:"like_type must be POST or COMMENT and is required"
                     },
                     content_id:{
@@ -236,7 +234,7 @@ async function create_comments_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["user_id", "post_id", "timestamp", "last_modified", "status"],
+                required:["user_id", "post_id", "timestamp", "last_modified", "status", "post_type"],
                 properties:{
                     user_id:{
                         bsonType:"objectId",
@@ -258,6 +256,14 @@ async function create_comments_collection(main_db){
                         enum:["ACTIVE", "NOT_ACTIVE"],
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
                     },
+                    post_type:{
+                        enum:["ROOM_POST"],
+                        description:"post_type is required"
+                    },
+                    comment_body:{
+                        bsonType:"string",
+                        description:"comment must be a string and is required"
+                    }
                 }
             }
         }
@@ -273,5 +279,5 @@ module.exports={
     create_room_follow_collection:create_room_follow_collection,
     create_likes_collection:create_likes_collection,
     create_comments_collection:create_comments_collection,
-    create_post_collection:create_post_collection
+    create_room_post_collection:create_room_post_collection
 }

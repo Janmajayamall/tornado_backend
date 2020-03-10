@@ -85,13 +85,49 @@ module.exports = gql`
         post_id:ID!,
         timestamp:String!,
         last_modified:String!,
-        status:String!
+        status:String!,
+        comment_body:String!
     }
 
     # Mutation create_comment/deactivate_comment
     input create_comment_input {
         user_id:ID!,
-        post_id:ID!
+        post_id:ID!,
+        post_type:String!,
+        comment_body:String!
+    }
+
+    input edit_comment_input {
+        comment_body:String!
+    }
+
+    type Room_post {
+        _id:ID!, 
+        creator_id:ID!, 
+        img_url:String, 
+        vid_url:String, 
+        description:String,
+        room_ids:[ID!]!,
+        timestamp:String!,
+        last_modified:String!,
+        status:String!
+    }   
+
+    #Mutation create_room_post
+    input create_room_post_input {
+        creator_id:ID!,
+        img_url:String,
+        vid_url:String,
+        description:String,
+        room_ids:[ID!]!,
+    }
+
+    #Mutation edit_room_post
+    input edit_room_post_input {
+        img_url:String,
+        vid_url:String,
+        description:String,
+        room_ids:[ID!],
     }
 
     type Mutation {
@@ -113,10 +149,13 @@ module.exports = gql`
 
         #comments
         create_comment(user_input:create_comment_input):Comment!,
-        deactivate_comment(user_id:create_comment_input):Comment!
+        deactivate_comment(_id:ID!):Comment!,
+        edit_comment(_id:ID!, user_input:edit_comment_input):Comment!
 
-
-
+        #room_posts
+        create_room_post(user_input:create_room_post_input):Room_post!
+        edit_room_post(_id:ID!, user_input:edit_room_post_input):Room_post!
+        deactivate_room_post(_id:ID!):Room_post!
     }
 
 

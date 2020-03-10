@@ -6,7 +6,7 @@ module.exports = {
             user_accounts:"user_accounts",
             rooms:"rooms",
             room_follows:"room_follows",
-            posts:"posts",
+            room_posts:"room_posts",
             likes:"likes",
             comments:"comments"
         },
