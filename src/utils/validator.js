@@ -1,3 +1,9 @@
+const {ObjectID} = require ("mongodb")
+const {UserInputError} = require("apollo-server-express")
+
+
+// users queries/mutations
+
 function user_register_validation(user_object){
 
     const errors = {}
@@ -63,8 +69,265 @@ function user_login_validation(user_object){
     
 }
 
+//end
+
+// rooms queries/mutations
+
+function create_room_validation(object){
+
+    const errors = {}
+
+    if(object.name.trim() === ""){
+        errors.name="name must not be empty"
+    }else if(object.length>150){
+        errors.name="please choose a shorted name (room name must not be more than 150 characters)"
+    }
+
+    if(object.creator_id.trim() === ""){
+        errors.creator_id = "creator_id must not be empty"
+    }else if(!is_valid_objectid(object.creator_id)){
+        errors.creator_id = "creator_id is not a valid ObjectID"
+    }
+    
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+function follow_room_validation(object){
+
+    const errors = {}
+
+    if(object.room_id.trim() === ""){
+        errors.room_id="room_id must not be empty"
+    }else if(!is_valid_objectid(object.room_id)){
+        errors.room_id = "room_id is not a valid ObjectID"
+    }
+
+    if(object.follower_id.trim() === ""){
+        errors.follower_id="follower_id must not be empty"
+    }else if(!is_valid_objectid(object.follower_id)){
+        errors.follower_id = "follower_id is not a valid ObjectID"
+    }
+
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+function unfollow_room_validation(object){
+
+    return follow_room_validation(object)
+
+}
+
+//end
+
+//room_posts queries/mutations
+
+function create_room_post_validation(object){
+
+    errors = {}
+
+    if(object.creator_id.trim() === ""){
+        errors.creator_id = "creator_is must not be empty"
+    }else if(!is_valid_objectid(object.creator_id)){
+        errors.creator_id = "creator_id is not a valid ObjectID"
+    }
+
+    if(object.room_ids.length === 0){
+        errors.rooms_id = "please provide at least one room_id"
+    }else{
+        object.room_ids.forEach((element, index) => {
+            if (!is_valid_objectid(element)){
+                errors.rooms_id = `room_id at index:${index} is not valid ObjectID`
+                break
+            }
+        });
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+function edit_room_post_validation(object){
+
+    if(object.room_ids.length === 0){
+        errors.rooms_id = "please provide at least one room_id"
+    }else{
+        object.room_ids.forEach((element, index) => {
+            if (!is_valid_objectid(element)){
+                errors.rooms_id = `room_id at index:${index} is not valid ObjectID`
+                break
+            }
+        });
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+}
+
+
+//end 
+
+
+// likes queries/mutations
+
+function create_like_validation(object){
+
+    errors = {}
+
+    if(object.user_id.trim() === ""){
+        errors.user_id = "user_id must not be empty"
+    }else if (!is_valid_objectid(errors.user_id)){
+        errors.user_id = "user_id is not valid ObjectID"
+    }
+
+    if(object.like_type.trim() === ""){
+        errors.like_type = "like_type must not be empty"
+    }else{
+
+        if (!(["ROOM_POST", "COMMENT"].includes(object.like_type.trim()))){
+            errors.like_type = `like type must be from ["ROOM_POST", "COMMENT"]`
+        }
+    }
+    
+    if (object.content_id.trim() === ""){
+        errors.content_id = "content_id must not be empty"
+    }else if(!is_valid_objectid(object.content_id)){
+        errors.content_id = "content_id is not valid ObjectID"
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+}
+
+function unlike_content_validation(object){
+
+    return create_like_validation(object)
+
+}
+
+//end
+
+// comments queries/mutations
+
+function create_comment_validation(object){
+
+    errors = {}
+
+    if(object.user_id.trim() === ""){
+        errors.user_id = "user_id must not be empty"
+    }else if (!is_valid_objectid(errors.user_id)){
+        errors.user_id = "user_id is not valid ObjectID"
+    }
+
+    if(object.content_id.trim() === ""){
+        errors.content_id = "content_id must not be empty"
+    }else if (!is_valid_objectid(errors.content_id)){
+        errors.content_id = "content_id is not valid ObjectID"
+    }
+
+    if(object.content_type.trim() === ""){
+        errors.content_type = "content_type must not be empty"
+    }else if(!(["ROOM_POST"].includes(object.content_type.trim()))){
+        errors.content_type = `content_type must be form ["ROOM_POST"]`
+    }
+
+    if(object.comment_body.trim() === ""){
+        errors.comment_body = "comment_body must not be empty"
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+function edit_comment_validation(object){
+
+    errors = {}
+
+    if (object.comment_body.trim() === ""){
+        errors.comment_body = "comment_body must not be empty"
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+//end
+
+// general
+function is_valid_objectid(object_id){
+
+    return ObjectID(object_id)===object_id
+
+}
+
+function objectid_validation(object_id){
+
+    errors = {}
+
+    if(object_id.trim() === ""){
+        error.object_id = "id passed in must not be empty"
+    }else if(!is_valid_objectid(object_id))
+        error.object_id = "id is not valid ObjectID"
+}
+
+function validator_wrapper(errors){
+
+    if (!errors.valid){
+
+        throw new UserInputError("Error", {
+            errors: errors.errors
+        })
+
+    }
+
+}
+
 
 module.exports = {
     user_register_validation,
-    user_login_validation
+    user_login_validation,
+
+    //room queries/mutations
+    create_room_validation,
+    follow_room_validation,
+    unfollow_room_validation,
+
+    //room_posts queries/mutations
+    create_room_post_validation,
+    edit_room_post_validation,
+
+    //likes queries/mutations
+    create_like_validation, 
+    unlike_content_validation,
+
+    //comments queries/mutations
+    create_comment_validation, 
+    edit_comment_validation,
+
+    //general
+    objectid_validation,
+    validator_wrapper
+
+
 }

@@ -18,8 +18,8 @@ async function create_like(db_structure, like_object){
         if (like_check.status="NOT_ACTIVE"){
 
             //reactivate the like_check object
-            const reactive_like_res = await reactive_like_content(db_structure, like_object)
-            return reactive_like_res
+            const reactivate_like_res = await reactivate_like(db_structure, like_object)
+            return reactivate_like_res
 
         }else{
 
@@ -34,7 +34,9 @@ async function create_like(db_structure, like_object){
         ...like_object,
         status:"ACTIVE",
         timestamp:new Date(),
-        last_modified:new Date()
+        last_modified:new Date(),
+        user_id:ObjectID(like_object.user_id),
+        content_id:ObjectID(like_object.content_id)
     }
     let like_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.likes).insertOne(like_value)
     like_res = get_insert_one_result(like_res)
@@ -55,14 +57,14 @@ async function unlike_content(db_structure, like_object){
                                                                                                                                     status:"NOT_ACTIVE",
                                                                                                                                     last_modified:new Date()
                                                                                                                                 }
-                                                                                                                            }, { returnNewDocument:true})
+                                                                                                                            }, { returnOriginal:false})
 
     like_res = like_res.value
 
     return like_res
 }
 
-async function reactive_like_content(db_structure, like_object){
+async function reactivate_like(db_structure, like_object){
 
     //updating the status of the like object to "NOT_ACTIVE"
     //Note: like is uniquely identified using: user_id, content_id, like_type
@@ -76,7 +78,7 @@ async function reactive_like_content(db_structure, like_object){
                                                                                                                                     status:"ACTIVE",
                                                                                                                                     last_modified:new Date()
                                                                                                                                 }
-                                                                                                                            }, { returnNewDocument:true})
+                                                                                                                            }, { returnOriginal:false})
 
     like_res = like_res.value
 
@@ -89,6 +91,6 @@ module.exports = {
 
     create_like,
     unlike_content,
-    reactive_like_content
+    reactivate_like
 
 }

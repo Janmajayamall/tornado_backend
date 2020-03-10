@@ -1,5 +1,5 @@
 const mongodb_like_queries = require("./../../mongodb_queries/like")
-const {} = require("./../../utils/validator")
+const {create_like_validation, unlike_content_validation, validator_wrapper, objectid_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 
 module.exports = {
@@ -13,7 +13,9 @@ module.exports = {
             }
         
             const like_object = args.user_input
-            //TODO:Validate the input
+            
+            //Validate the input
+            validator_wrapper(create_like_validation(like_object))
 
             const result = await mongodb_like_queries.create_like(context.db_structure, like_object)
             return result
@@ -27,7 +29,9 @@ module.exports = {
             }
         
             const like_object = args.user_input
-            //TODO:Validate the input
+            
+            //Validate the input
+            validator_wrapper(unlike_content_validation(like_object))
             
             const result = await mongodb_like_queries.unlike_content(context.db_structure, like_object)
             return result

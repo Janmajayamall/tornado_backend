@@ -2,6 +2,7 @@ const {UserInputError, ApolloError, AuthenticationError} = require("apollo-serve
 const {get_insert_one_result} = require("../utils/mongo_queries")
 const {ObjectID} = require("mongodb")
 
+
 async function create_room(db_structure, room_object){
 
     //checking whether room already exists or not
@@ -11,8 +12,10 @@ async function create_room(db_structure, room_object){
         //checking whether the room is NOT_ACTIVE
         if (room_check.status==="NOT_ACTIVE"){
 
-            const reactive_res = await reactivate_room(db_structure, room_check._id.toString())
-            return reactive_res
+            const reactivate_res = await reactivate_room(db_structure, room_check._id.toString())
+            //making the person follow the room 
+            const follow_res = await follow_room(db_structure, {room_id:reactivate_res._id, follower_id:room_object.creator_id})
+            return reactivate_res
 
         }else{
             throw new UserInputError(`Room with name:${room_object.name} already exists`)
@@ -30,12 +33,9 @@ async function create_room(db_structure, room_object){
     
     let room_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).insertOne(room_value)
     room_res = get_insert_one_result(room_res)
+    const follow_res = await follow_room(db_structure, {room_id:room_res._id, follower_id:room_res.creator_id})
 
-    return {
-        ...room_res,
-        timestamp:room_res.timestamp.toISOString(),
-        last_modified:room_res.last_modified.toISOString()
-    }
+    return room_res
 
 }
 
@@ -49,15 +49,11 @@ async function deactivate_room(db_structure, room_id){
                                                                                                                         status:"NOT_ACTIVE",
                                                                                                                         last_modified:new Date()
                                                                                                                     }
-                                                                                                                }, { returnNewDocument:true})
+                                                                                                                }, { returnOriginal:false})
 
     room_res = room_res.value
                                                                                                      
-    return {
-        ...room_res,
-        timestamp:room_res.timestamp.toISOString(),
-        last_modified:room_res.last_modified.toISOString()
-    }
+    return room_res
 
 }
 
@@ -71,22 +67,17 @@ async function reactivate_room(db_structure, room_id){
                                                                                                                         status:"ACTIVE",
                                                                                                                         last_modified:new Date()
                                                                                                                     }
-                                                                                                                }, { returnNewDocument:true})
+                                                                                                                }, { returnOriginal:false})
 
     room_res = room_res.value                                                                                                        
                                                                                                                 
-    return {
-        ...room_res,
-        timestamp:room_res.timestamp.toISOString(),
-        last_modified:room_res.last_modified.toISOString()
-    }
+    return room_res
 
 }
 
 async function follow_room(db_structure, follow_object){
 
     //TODO: check whether room id active or not
-
 
     //checking whether follow object already exists or not
     let follow_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).findOne({room_id:ObjectID(follow_object.room_id), follower_id:ObjectID(follow_object.follower_id)})
@@ -103,24 +94,15 @@ async function follow_room(db_structure, follow_object){
                                                                                                                                     status:"ACTIVE",
                                                                                                                                     last_modified:new Date()
                                                                                                                                 }
-                                                                                                                            }, { returnNewDocument:true})
+                                                                                                                            }, { returnOriginal:false})
             
             follow_res = follow_res.value
                                                                                                                             
-            return {
-                ...follow_res,
-                timestamp:follow_res.timestamp.toISOString(),
-                last_modified:follow_res.last_modified.toISOString()
-            }                                                                                                                            
+            return follow_res                                                                                                                            
 
         }else{
 
-            return {
-                ...follow_check,
-                timestamp:follow_check.timestamp.toISOString(),
-                last_modified:follow_check.last_modified.toISOString()
-            }
-
+            return follow_check
         }
     }
     
@@ -135,11 +117,7 @@ async function follow_room(db_structure, follow_object){
     }
     let follow_result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).insertOne(follow_value)
     follow_result = get_insert_one_result(follow_result)
-    return {
-        ...follow_result,
-        timestamp:follow_result.timestamp.toISOString(),
-        last_modified:follow_result.last_modified.toISOString()
-    }
+    return follow_result
 
 }
 
@@ -154,17 +132,11 @@ async function unfollow_room(db_structure, follow_object){
                                                                                                                             status:"NOT_ACTIVE",
                                                                                                                             last_modified:new Date()
                                                                                                                         }
-                                                                                                                    }, { returnNewDocument:true})
+                                                                                                                    }, { returnOriginal:false})
   
     room_res = room_res.value
                                                                                                                     
-    return {
-        ...room_res,
-        timestamp:room_res.timestamp.toISOString(),
-        last_modified:room_res.last_modified.toISOString()
-
-    }                                                                                                                    
-
+    return room_res
 }
 
 module.exports = {

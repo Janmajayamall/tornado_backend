@@ -54,17 +54,17 @@ async function verify_jwt(jwt){
 
     const token = jwt.split(" ")[1]
 
-    if (token === null){
-        throw new AuthenticationError("JWT malformed")
+    if (!token){
+        throw new AuthenticationError(`JWT should in format "Bearer [token]"`)
     }
 
     jsonwebtoken.verify(jwt, PUB_KEY, {ignoreExpiration:true, algorithms:["RS256"]}, (err, payload)=>{
         
         if (err.name === "TokenExpiredError"){
-            throw new Error("Token Expired")
+            throw new AuthenticationError("Token Expired")
         }
 
-        if (err.name === "JsonWebTokenError"){
+        if (err.name === "JsonWebTokenError"){ 
             throw new AuthenticationError("JWT malformed")
         }
         

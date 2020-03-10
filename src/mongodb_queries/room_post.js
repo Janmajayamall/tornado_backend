@@ -3,7 +3,6 @@ const {get_insert_one_result, get_objectids_array} = require("../utils/mongo_que
 const {ObjectID} = require("mongodb")
 
 async function create_room_post(db_structure, room_post_object){
-    //TODO:CHECK WHY IS UPDATE RETURNING OLD DOCUMENT
     //create room_post_value for insert
     let room_post_value = {
         ...room_post_object,
@@ -13,7 +12,6 @@ async function create_room_post(db_structure, room_post_object){
         status:"ACTIVE",
         room_ids:get_objectids_array(room_post_object.room_ids)
     }
-    console.log(room_post_value, "dawdawdaw")
     let room_post_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).insertOne(room_post_value)
     room_post_res = get_insert_one_result(room_post_res)
     return room_post_res
@@ -29,7 +27,7 @@ async function deactivate_room_post(db_structure, room_post_id){
                                                                                                                                         status:"NOT_ACTIVE",
                                                                                                                                         last_modified:new Date()
                                                                                                                                     }
-                                                                                                                                }, { returnNewDocument:true})
+                                                                                                                                }, { returnOriginal:false})
 
     room_post_res = room_post_res.value
     return room_post_res                                                                                                                                
@@ -51,7 +49,7 @@ async function edit_room_post(db_structure, room_post_id, room_post_edit_object)
                                                                                                                                             ...room_post_edit_object,
                                                                                                                                             last_modified:new Date()
                                                                                                                                         }
-                                                                                                                                    }, { returnNewDocument:true})
+                                                                                                                                    }, { returnOriginal:false})
 
     room_post_res = room_post_res.value
     return room_post_res                                                                                                                                

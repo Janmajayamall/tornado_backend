@@ -234,13 +234,13 @@ async function create_comments_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["user_id", "post_id", "timestamp", "last_modified", "status", "post_type"],
+                required:["user_id", "content_id", "timestamp", "last_modified", "status", "content_type","comment_body"],
                 properties:{
                     user_id:{
                         bsonType:"objectId",
                         description:"user_id must be a objectId and is required"
                     },
-                    post_id:{
+                    content_id:{
                         bsonType:"objectId",
                         description:"post_id must be a objectId and is required"
                     },
@@ -256,7 +256,7 @@ async function create_comments_collection(main_db){
                         enum:["ACTIVE", "NOT_ACTIVE"],
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
                     },
-                    post_type:{
+                    content_type:{
                         enum:["ROOM_POST"],
                         description:"post_type is required"
                     },

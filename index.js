@@ -40,7 +40,14 @@ const app = express()
 const server = new ApolloServer({
     typeDefs:type_defs,
     resolvers:resolvers,
-    context:()=>({db_structure:db_structure})
+    context:(req)=>{
+
+        return({
+            db_structure:db_structure,
+            req_headers:req.headers
+        })
+
+    }   
 })
 server.applyMiddleware({app})
 

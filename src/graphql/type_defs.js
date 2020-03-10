@@ -76,24 +76,25 @@ module.exports = gql`
     input create_like_input {
         user_id:ID!,
         like_type:String!,
-        content_type:ID!
+        content_id:ID!
     }
 
     type Comment {
         _id:ID!,
         user_id:ID!,
-        post_id:ID!,
+        content_id:ID!,
         timestamp:String!,
         last_modified:String!,
         status:String!,
-        comment_body:String!
+        comment_body:String!,
+        content_type:String!
     }
 
     # Mutation create_comment/deactivate_comment
     input create_comment_input {
         user_id:ID!,
-        post_id:ID!,
-        post_type:String!,
+        content_id:ID!,
+        content_type:String!,
         comment_body:String!
     }
 
