@@ -95,7 +95,7 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
     // getting the posts
     // const room_posts = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).find({room_ids:{$in:follow_room_ids}, status:"ACTIVE"}).sort({timestamp:-1})  
     
-    const re = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).aggregate(
+    const result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).aggregate(
         [
             {$match: { status: "ACTIVE", room_ids:{$in:follow_room_ids}}},
             {$lookup: {
@@ -182,20 +182,11 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
     ).toArray()
 
     //
-    console.log(re)
-    return null 
     
+    return result
+
     //TODO: Implement pagination as well
 
-    //get all room_ids followed by the user
-
-    //get all room_posts containing all the room_ids
-
-    //get like counts for each post
-
-    //get bool value of whether user_id likes the post or not
-
-    //return the post
 
 }
 
