@@ -60,25 +60,10 @@ async function edit_room_post(db_structure, room_post_id, room_post_edit_object)
 //queries
 
 async function get_room_posts_user_id(db_structure, user_id, get_room_post_object){
-
-    //implementing cursor based pagination
-        //for getting room_posts for user feed we will be using cursor based pagination -- using timestamp
-        // user_input:{
-
-        //     last_loaded_component_timestamp (last_loaded_component_timestamp will be used as a cursor)
-
-        //     limit (Number of room_posts to return)
-
-        // }
-
-        // return object:{
-
-        //     user_id,
-        //     room_posts --> list of room_posts
-        //     last_post --> used for cursor
-        //     has_next --> boolean value of whether most posts exists or not
-
-        // }
+    
+    //CONSTANTS
+    const POST_LIMIT = 5
+    const ROOM_POST_CURSOR = (new Date().getTime()).toString()
     
     //find rooms followed by the user
     const room_objects_arr = await mongodb_room_queries.find_followed_rooms(db_structure,user_id)
@@ -89,15 +74,22 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
     room_objects_arr.forEach(room_object => {
         follow_room_ids.push(ObjectID(room_object.room_id))
     });
-    console.log(follow_room_ids)
 
-    console.log(user_id, "this is new")
-    // getting the posts
-    // const room_posts = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).find({room_ids:{$in:follow_room_ids}, status:"ACTIVE"}).sort({timestamp:-1})  
-    
-    const result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).aggregate(
+    //fixing the get_room_post_object
+    if (!get_room_post_object.limit){
+        get_room_post_object.limit = POST_LIMIT
+    }
+    if (!get_room_post_object.room_post_cursor){
+        get_room_post_object.room_post_cursor = ROOM_POST_CURSOR
+    }
+
+
+    // getting the posts    
+    const room_posts_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).aggregate(
         [
-            {$match: { status: "ACTIVE", room_ids:{$in:follow_room_ids}}},
+            {$match: { status: "ACTIVE", room_ids:{$in:follow_room_ids}, timestamp:{$lt:new Date(parseInt(get_room_post_object.room_post_cursor))}}},
+            {$sort:{timestamp:-1}},
+            {$limit: get_room_post_object.limit+1},
             {$lookup: {
                 from:db_structure.main_db.collections.likes,
                 let:{post_id:"$_id"},
@@ -148,10 +140,11 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                 from:db_structure.main_db.collections.user_accounts,
                 localField:"creator_id",
                 foreignField:"user_id",
-                as:"creator_info"
+                as:"creator_info_dev"
             }},
             {
                 $project:{
+                    _id:1,
                     creator_id: 1,
                     img_url: 1,
                     description:1,
@@ -159,8 +152,7 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                     timestamp:1, 
                     last_modified: 1,
                     status: 1,
-                    creator_info: 1,
-
+                    vid_url:1,
                     likes_count:{
                         $cond:{
                             if: {$eq:[{$size:"$likes_count_dev"}, 0]},
@@ -175,18 +167,50 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                             else:{$arrayElemAt: [ "$user_liked_dev.did_user_like", 0 ]}
                         }
                         
+                    },
+                    creator_info:{
+                        $cond:{
+                            if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                            then:null,
+                            else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                        }
                     }
                 }
             }
         ]
     ).toArray()
 
-    //
+    //more posts left after this
+    let has_more = false
+
+    //length of rooms_post_list
+    let room_post_list_len = room_posts_list.length
+
+    //checking length of array
+    if (room_post_list_len === get_room_post_object.limit+1){
+        has_more = true
+        room_posts_list.pop()  //removing the extra post
+        room_post_list_len-=1
+    }
+
+    //getting new room post cursor
+    let new_cursor = get_room_post_object.room_post_cursor
+    if (room_post_list_len>0){
+        new_cursor = room_posts_list[room_post_list_len-1].timestamp
+    }
+
+    //combining result
+    const result = {
+
+        room_posts:room_posts_list,
+        next_page: has_more,
+        limit:get_room_post_object.limit,
+        last_room_post_cursor:get_room_post_object.room_post_cursor,
+        room_post_cursor:new_cursor
+
+    }
     
     return result
-
-    //TODO: Implement pagination as well
-
 
 }
 

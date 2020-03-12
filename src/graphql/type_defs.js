@@ -13,6 +13,17 @@ module.exports = gql`
         email:String,
         dob:String
     }
+
+    #user account type
+    type User_account {
+        _id:ID!,
+        user_id:ID!,
+        dob:String!, 
+        username:String!, 
+        avatar:String!,
+        timestamp:String!, 
+        last_modified:String!
+    }
     
     # Mutation register_user input
     input register_user_input {
@@ -112,6 +123,29 @@ module.exports = gql`
         status:String!
     }   
 
+    type Room_post_feed {
+        _id:ID!, 
+        creator_id:ID!, 
+        img_url:String, 
+        vid_url:String, 
+        description:String,
+        room_ids:[ID!]!,
+        timestamp:String!,
+        last_modified:String!,
+        status:String!,
+        creator_info:User_account!,
+        likes_count:Int!,
+        user_liked:Boolean!,
+    }
+
+    type Room_post_cursor {
+        room_posts:[Room_post_feed!]!,
+        next_page: Boolean!,
+        limit: Int!,
+        last_room_post_cursor: String!,
+        room_post_cursor: String!
+    }
+
     #Mutation create_room_post
     input create_room_post_input {
         creator_id:ID!,
@@ -119,6 +153,12 @@ module.exports = gql`
         vid_url:String,
         description:String,
         room_ids:[ID!]!,
+    }
+
+    #Query room_post_feed 
+    input room_post_feed {
+        limit:Int,
+        room_post_cursor:String
     }
 
     #Mutation edit_room_post
@@ -159,7 +199,8 @@ module.exports = gql`
 
     type Query {
 
-        get_room_posts_user_id:String
+        #room_post
+        get_room_posts_user_id(user_input:room_post_feed):Room_post_cursor
 
     }   
 

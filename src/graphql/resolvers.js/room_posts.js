@@ -68,8 +68,10 @@ module.exports = {
             //validating main_db instance
             db_instance_validation(context.db_structure.main_db)
 
+            const get_room_post_object = args.user_input
+
             //getting room_posts matching user_id
-            const result = await mongodb_room_post_queries.get_room_posts_user_id(context.db_structure, user_id, {})
+            const result = await mongodb_room_post_queries.get_room_posts_user_id(context.db_structure, user_id, get_room_post_object)
             return result
 
         }
