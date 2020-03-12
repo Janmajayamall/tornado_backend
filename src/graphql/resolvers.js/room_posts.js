@@ -1,6 +1,8 @@
 const mongodb_room_post_queries = require("./../../mongodb_queries/room_post")
 const {create_room_post_validation, validator_wrapper, objectid_validation, edit_room_post_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
+const {verify_jwt} = require("./../../utils/authentication")
+const {db_instance_validation} = require("./../../utils/general_checks")
 
 module.exports = {
     Mutation:{
@@ -55,5 +57,23 @@ module.exports = {
             return result
         },
 
+    },
+
+    Query:{
+
+        async get_room_posts_user_id(parents, args, context){
+            //authenticating user request and identifying user_id
+            const user_id = await verify_jwt(context.req_headers.authorization)
+    
+            //validating main_db instance
+            db_instance_validation(context.db_structure.main_db)
+
+            //getting room_posts matching user_id
+            const result = await mongodb_room_post_queries.get_room_posts_user_id(context.db_structure, user_id, {})
+            return result
+
+        }
+
     }
+
 }

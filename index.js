@@ -40,8 +40,7 @@ const app = express()
 const server = new ApolloServer({
     typeDefs:type_defs,
     resolvers:resolvers,
-    context:(req)=>{
-
+    context:({req})=>{
         return({
             db_structure:db_structure,
             req_headers:req.headers

@@ -2,9 +2,7 @@ const {gql} = require("apollo-server-express")
 
 module.exports = gql`
 
-    type Query {
-        test: String
-    }
+
 
     #user info type
     type User {
@@ -158,6 +156,12 @@ module.exports = gql`
         edit_room_post(_id:ID!, user_input:edit_room_post_input):Room_post!
         deactivate_room_post(_id:ID!):Room_post!
     }
+
+    type Query {
+
+        get_room_posts_user_id:String
+
+    }   
 
 
 `;

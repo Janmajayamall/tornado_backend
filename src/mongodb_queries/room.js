@@ -2,6 +2,7 @@ const {UserInputError, ApolloError, AuthenticationError} = require("apollo-serve
 const {get_insert_one_result} = require("../utils/mongo_queries")
 const {ObjectID} = require("mongodb")
 
+//mutations resolvers
 
 async function create_room(db_structure, room_object){
 
@@ -139,10 +140,26 @@ async function unfollow_room(db_structure, follow_object){
     return room_res
 }
 
+//queries resolvers
+
+async function find_followed_rooms(db_structure, user_id){
+    const room_objects = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).find({follower_id:ObjectID(user_id)}).toArray()
+    return room_objects
+
+}
+
+
+
 module.exports = {
+
+    //mutations
     create_room,
     deactivate_room,
     reactivate_room,
     follow_room,
-    unfollow_room
+    unfollow_room,
+
+    //queries
+    find_followed_rooms
+
 }

@@ -1,15 +1,14 @@
 const mongodb_user_queries = require("./../../mongodb_queries/user")
 const {user_register_validation, user_login_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
+const {db_instance_validation} = require("./../../utils/general_checks")
 
 module.exports = {
     Mutation:{
         async register_user(parent, args, context){
 
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             const user_object = args.user_input
 
@@ -30,9 +29,7 @@ module.exports = {
         async login_user(parent, args, context){
 
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             const user_object = args.user_input
 

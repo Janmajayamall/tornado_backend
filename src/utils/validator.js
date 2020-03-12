@@ -141,12 +141,14 @@ function create_room_post_validation(object){
     }
 
     if(object.room_ids.length === 0){
-        errors.rooms_id = "please provide at least one room_id"
+        errors.room_ids = "please provide at least one room_id"
     }else{
         object.room_ids.forEach((element, index) => {
             if (!is_valid_objectid(element)){
-                errors.rooms_id = `room_id at index:${index} is not valid ObjectID`
-                break
+                if (!errors.room_ids){
+                    errors.room_ids = `room_id at index:${index} is not valid ObjectID`
+                }
+                
             }
         });
     }
@@ -189,7 +191,7 @@ function create_like_validation(object){
 
     if(object.user_id.trim() === ""){
         errors.user_id = "user_id must not be empty"
-    }else if (!is_valid_objectid(errors.user_id)){
+    }else if (!is_valid_objectid(object.user_id)){
         errors.user_id = "user_id is not valid ObjectID"
     }
 
@@ -277,7 +279,7 @@ function edit_comment_validation(object){
 // general
 function is_valid_objectid(object_id){
 
-    return ObjectID(object_id)===object_id
+    return ObjectID(object_id)==object_id
 
 }
 
