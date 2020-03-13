@@ -31,7 +31,7 @@ async function register_user(db_structure,  user_object){
 
         const user_account_value = {
             username:user_object.username,
-            dob:new Date(user_object.dob),
+            dob:new Date(parseInt(user_object.dob)),
             avatar:user_object.avatar,
             user_id:user_id,
             timestamp: new Date(),

@@ -53,10 +53,47 @@ async function deactivate_comment(db_structure, comment_id){
     return comment_res                                                                                                                                    
 }
 
+//queries
+
+async function get_post_comments(db_structure, comment_query_object){
+
+    console.log(comment_query_object)
+
+    const comments_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.comments).aggregate([
+        {$match: {status:"ACTIVE", content_id:ObjectID(comment_query_object.content_id), content_type:comment_query_object.content_type}},
+        {$lookup: {
+            from:db_structure.main_db.collections.user_accounts,
+            localField:"user_id",
+            foreignField:"user_id",
+            as:"creator_info_dev"
+        }},
+        {$addFields:{
+            creator_info:{
+                $cond:{
+                    if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                    then:null,
+                    else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                } 
+            }
+        }},
+        {$project:{
+            creator_info_dev:0
+        }}
+    ]).toArray()
+
+    console.log(comments_list)
+
+    return comments_list
+
+}
+
 module.exports = {
 
     create_comment,
     edit_comment,
-    deactivate_comment
+    deactivate_comment,
+
+    //queries
+    get_post_comments
 
 }

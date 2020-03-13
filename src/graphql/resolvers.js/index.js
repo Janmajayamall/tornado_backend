@@ -13,6 +13,7 @@ module.exports = {
         ...like_resolvers.Mutation
     },
     Query:{
-        ...room_post_resolvers.Query
+        ...room_post_resolvers.Query,
+        ...comment_resolvers.Query
     }
 }

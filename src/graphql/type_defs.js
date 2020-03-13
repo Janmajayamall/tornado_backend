@@ -99,6 +99,18 @@ module.exports = gql`
         content_type:String!
     }
 
+    type Comment_with_creator {
+        _id:ID!,
+        user_id:ID!,
+        content_id:ID!,
+        timestamp:String!,
+        last_modified:String!,
+        status:String!,
+        comment_body:String!,
+        content_type:String!,
+        creator_info:User_account!
+    }
+
     # Mutation create_comment/deactivate_comment
     input create_comment_input {
         user_id:ID!,
@@ -109,6 +121,12 @@ module.exports = gql`
 
     input edit_comment_input {
         comment_body:String!
+    }
+
+    #Query get_post_comments
+    input get_post_comments_input {
+        content_id:ID!,
+        content_type:String!
     }
 
     type Room_post {
@@ -157,7 +175,7 @@ module.exports = gql`
 
     #Query room_post_feed 
     input room_post_feed {
-        limit:Int,
+        limit:Int!,
         room_post_cursor:String
     }
 
@@ -200,7 +218,10 @@ module.exports = gql`
     type Query {
 
         #room_post
-        get_room_posts_user_id(user_input:room_post_feed):Room_post_cursor
+        get_room_posts_user_id(user_input:room_post_feed):Room_post_cursor,
+
+        #comments
+        get_post_comments(user_input:get_post_comments_input):[Comment_with_creator!]!
 
     }   
 

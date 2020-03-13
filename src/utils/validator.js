@@ -30,7 +30,12 @@ function user_register_validation(user_object){
     }
 
     if (user_object.dob.trim() === ""){
-        errors.dob = "date of birth must not be empty"
+
+        try{
+            let result = date_validation(user_object.dob.trim())
+        }catch(e){
+            errors.dob = "date of birth must not be empty"
+        }    
     }else {
         var date = Date.parse(user_object.dob)
         if (isNaN(date)){
@@ -161,6 +166,8 @@ function create_room_post_validation(object){
 }
 
 function edit_room_post_validation(object){
+    
+    errors={}
 
     if(object.room_ids.length === 0){
         errors.rooms_id = "please provide at least one room_id"
@@ -178,6 +185,34 @@ function edit_room_post_validation(object){
         valid: Object.keys(errors).length<1
     }
 }
+
+function get_room_post_object_validation(object){
+
+    errors = {}
+
+    if (object.limit<1){
+        errors.limit = "limit specified should be greater than 0 and is required"
+    }
+
+    if (object.room_post_cursor){
+
+        try{
+            let result = date_validation(object.room_post_cursor)
+        }catch(e){
+            errors.room_post_cursor = "room_post_cursor should be Date object in milliseconds"
+        }
+
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+
+
 
 
 //end 
@@ -232,13 +267,13 @@ function create_comment_validation(object){
 
     if(object.user_id.trim() === ""){
         errors.user_id = "user_id must not be empty"
-    }else if (!is_valid_objectid(errors.user_id)){
+    }else if (!is_valid_objectid(object.user_id)){
         errors.user_id = "user_id is not valid ObjectID"
     }
 
     if(object.content_id.trim() === ""){
         errors.content_id = "content_id must not be empty"
-    }else if (!is_valid_objectid(errors.content_id)){
+    }else if (!is_valid_objectid(object.content_id)){
         errors.content_id = "content_id is not valid ObjectID"
     }
 
@@ -291,18 +326,45 @@ function objectid_validation(object_id){
         error.object_id = "id passed in must not be empty"
     }else if(!is_valid_objectid(object_id))
         error.object_id = "id is not valid ObjectID"
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }   
 }
 
 function validator_wrapper(errors){
 
     if (!errors.valid){
-
+        
         throw new UserInputError("Error", {
             errors: errors.errors
         })
 
     }
 
+}
+
+function date_validation(date_value){
+    
+    //points to note
+    // 1. data_value should be in string format in milliseconds
+    // 2. you can get the milliseconds by new Date().getTime()
+
+    date_value = parseInt(date_value)
+
+    //checking if date_value is NaN
+    if (isNaN(date_value)){
+        throw new Error("Not valid date")
+    }
+
+    date = new Date(date_value)
+
+    if (date=="Invalid Date"){
+        throw new Error("Not valid date")
+    }
+    
+    return date
 }
 
 
@@ -318,6 +380,7 @@ module.exports = {
     //room_posts queries/mutations
     create_room_post_validation,
     edit_room_post_validation,
+    get_room_post_object_validation,
 
     //likes queries/mutations
     create_like_validation, 

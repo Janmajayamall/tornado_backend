@@ -1,5 +1,5 @@
 const mongodb_room_post_queries = require("./../../mongodb_queries/room_post")
-const {create_room_post_validation, validator_wrapper, objectid_validation, edit_room_post_validation} = require("./../../utils/validator")
+const {create_room_post_validation, validator_wrapper, objectid_validation, edit_room_post_validation, get_room_post_object_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 const {verify_jwt} = require("./../../utils/authentication")
 const {db_instance_validation} = require("./../../utils/general_checks")
@@ -69,6 +69,9 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             const get_room_post_object = args.user_input
+
+            //validating get_room_post_object
+            validator_wrapper(get_room_post_object_validation(get_room_post_object))
 
             //getting room_posts matching user_id
             const result = await mongodb_room_post_queries.get_room_posts_user_id(context.db_structure, user_id, get_room_post_object)

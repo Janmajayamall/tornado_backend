@@ -61,5 +61,27 @@ module.exports = {
             return result 
 
         }
+    },
+
+    Query:{
+
+        async get_post_comments(parents, args, context){
+
+            //authenticating user request and identifying user_id
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //validating main_db instance
+            db_instance_validation(context.db_structure.main_db)
+
+            const comment_query_object = args.user_input
+            //TODO: validate comment_query_object
+
+            //getting the comment_object
+            const result = await mongodb_comments_queries.get_post_comments(context.db_structure, comment_query_object)
+            
+            return result
+
+        }
+
     }
 }
