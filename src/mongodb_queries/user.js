@@ -1,6 +1,7 @@
 const auth_utils = require("./../utils/authentication")
 const {UserInputError, ApolloError, AuthenticationError} = require("apollo-server-express")
 const {get_insert_one_result} = require("../utils/mongo_queries")
+const {DEFAULT_AVATAR} = require("./../utils/constants")
 
 async function register_user(db_structure,  user_object){
 
@@ -32,7 +33,7 @@ async function register_user(db_structure,  user_object){
         const user_account_value = {
             username:user_object.username,
             dob:new Date(parseInt(user_object.dob)),
-            avatar:user_object.avatar,
+            avatar:DEFAULT_AVATAR,
             user_id:user_id,
             timestamp: new Date(),
             last_modified: new Date()

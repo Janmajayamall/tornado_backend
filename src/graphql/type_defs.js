@@ -31,7 +31,6 @@ module.exports = gql`
         password:String!,
         dob:String!,
         username:String!,
-        avatar:String!
     }
 
     # Mutation login_user input

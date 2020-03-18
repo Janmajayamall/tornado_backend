@@ -43,10 +43,6 @@ function user_register_validation(user_object){
         }
     }
 
-    if (user_object.avatar.trim() == ""){
-        error.avatar = "avatar url must not be empty"
-    }// TODO: Add verification for URL using regex
-
     return {
         errors,
         valid: Object.keys(errors).length<1
