@@ -18,7 +18,7 @@ async function register_user(db_structure,  user_object){
         if (hash === null){
             throw new ApolloError("hash generated is null")
         }
-        
+        // d
         //query mongodb for registering the user
         const user_value = {
             email:user_object.email,
