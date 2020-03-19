@@ -13,7 +13,7 @@ function user_register_validation(user_object){
     }else{
         const email_regex = /^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})$/;
         if (!user_object.email.match(email_regex)){
-            errors.email = "please enter a vaid email id"
+            errors.email = "please enter a valid email id"
         }
     }
 
@@ -29,18 +29,12 @@ function user_register_validation(user_object){
         errors.password = "password length should in range 8 to 50 (inclusive)"
     }
 
-    if (user_object.dob.trim() === ""){
+    if (!(user_object.age === parseInt(user_object.age, 10))){
+        errors.age = "age must not be empty, and should be Int"   
+    }
 
-        try{
-            let result = date_validation(user_object.dob.trim())
-        }catch(e){
-            errors.dob = "date of birth must not be empty"
-        }    
-    }else {
-        var date = Date.parse(user_object.dob)
-        if (isNaN(date)){
-            errors.dob = "dob must be ISOString"
-        }
+    if (user_object.name.trim() === ""){
+        errors.name = "name must not be empty"
     }
 
     return {

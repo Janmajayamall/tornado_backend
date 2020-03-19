@@ -2,6 +2,7 @@ const auth_utils = require("./../utils/authentication")
 const {UserInputError, ApolloError, AuthenticationError} = require("apollo-server-express")
 const {get_insert_one_result} = require("../utils/mongo_queries")
 const {DEFAULT_AVATAR} = require("./../utils/constants")
+const {ObjectID} = require("mongodb")
 
 async function register_user(db_structure,  user_object){
 
@@ -32,11 +33,14 @@ async function register_user(db_structure,  user_object){
 
         const user_account_value = {
             username:user_object.username,
-            dob:new Date(parseInt(user_object.dob)),
+            age:user_object.age,
             avatar:DEFAULT_AVATAR,
             user_id:user_id,
             timestamp: new Date(),
-            last_modified: new Date()
+            last_modified: new Date(),
+            name:user_object.name,
+            three_words:user_object.three_words,
+            bio:user_object.bio
 
         } //populating user_account_object with user_id and other required fields
         let result_user_account = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).insertOne(user_account_value) // inserting into collection user_accounts

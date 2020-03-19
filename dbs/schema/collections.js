@@ -39,15 +39,15 @@ async function create_user_account_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["user_id", "dob", "username", "avatar", "timestamp", "last_modified"],
+                required:["user_id", "age", "username", "avatar", "timestamp", "last_modified", "name"],
                 properties:{
                     user_id:{
                         bsonType:"objectId",
                         description:"user_id must be a objectId and is required"
                     },
-                    dob:{
-                        bsonType:"date",
-                        description:"dob (date of birth) must be a date(ISODate) and is required"
+                    age:{
+                        bsonType:"int",
+                        description:"age must be integer and is required"
                     },
                     username:{
                         bsonType:"string",
@@ -64,7 +64,20 @@ async function create_user_account_collection(main_db){
                     last_modified:{
                         bsonType:"date",
                         description:"last_modified must be a date(ISODate) and is required"
+                    },
+                    name:{
+                        bsonType:"string",
+                        description:"name must be string and is required"
+                    },
+                    three_words:{
+                        bsonType:"string",
+                        description:"three_words must be string and is optional"
+                    }, 
+                    bio:{
+                        bsonType:"string",
+                        description:"description must be string and is optional"
                     }
+
                 }
             }
         }

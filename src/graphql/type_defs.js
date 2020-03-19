@@ -11,26 +11,35 @@ module.exports = gql`
         avatar:String!,
         jwt:String,
         email:String,
-        dob:String
+        age:Int,
+        name:String, 
+        three_words:String,
+        bio:String
     }
 
     #user account type
     type User_account {
         _id:ID!,
         user_id:ID!,
-        dob:String!, 
+        age:Int!, 
         username:String!, 
         avatar:String!,
         timestamp:String!, 
-        last_modified:String!
+        last_modified:String!,
+        name:String, 
+        three_words:String,
+        bio:String
     }
     
     # Mutation register_user input
     input register_user_input {
         email:String!,
         password:String!,
-        dob:String!,
+        age:Int!,
         username:String!,
+        name:String!, 
+        three_words:String!,
+        bio:String!
     }
 
     # Mutation login_user input
@@ -226,3 +235,4 @@ module.exports = gql`
 
 
 `;
+
