@@ -5,6 +5,7 @@ module.exports = gql`
 
 
     #user info type
+    #only used for login & registration;contains jwt
     type User {
         _id:ID!,
         username:String!,
@@ -14,7 +15,8 @@ module.exports = gql`
         age:Int,
         name:String, 
         three_words:String,
-        bio:String
+        bio:String,
+        user_id:String!
     }
 
     #user account type
@@ -28,7 +30,7 @@ module.exports = gql`
         last_modified:String!,
         name:String, 
         three_words:String,
-        bio:String
+        bio:String,
     }
     
     # Mutation register_user input

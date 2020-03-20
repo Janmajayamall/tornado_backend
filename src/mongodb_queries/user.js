@@ -9,6 +9,7 @@ async function register_user(db_structure,  user_object){
         //query for checking whether user_object exists or not
         let email_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOne({"email":user_object.email})
         if (email_check){
+
             throw new UserInputError(`emailId:${user_object.email} already exists`)
         }
 
@@ -52,7 +53,7 @@ async function register_user(db_structure,  user_object){
         return {
             ...result_user_account,
             email:result_user.email,
-            jwt:jwt
+            jwt:jwt,
         }
 
 }

@@ -11,7 +11,6 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             const user_object = args.user_input
-
             //Validate the args
             validation_result = user_register_validation(user_object)
             if (!validation_result.valid){

@@ -64,7 +64,7 @@ module.exports = {
         async get_room_posts_user_id(parents, args, context){
             //authenticating user request and identifying user_id
             const user_id = await verify_jwt(context.req_headers.authorization)
-    
+            console.log(user_id, "dasw")
             //validating main_db instance
             db_instance_validation(context.db_structure.main_db)
 

@@ -33,9 +33,6 @@ function user_register_validation(user_object){
         errors.age = "age must not be empty, and should be Int"   
     }
 
-    if (user_object.name.trim() === ""){
-        errors.name = "name must not be empty"
-    }
 
     return {
         errors,
