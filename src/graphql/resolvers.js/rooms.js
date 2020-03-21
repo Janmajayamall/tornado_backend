@@ -3,7 +3,7 @@ const {validator_wrapper,
         create_room_validation, 
         follow_room_validation, 
         unfollow_room_validation,
-        objectid_validation,
+        objectid_validation,    
         } = require("./../../utils/validator")
 const {db_instance_validation,} = require("./../../utils/general_checks")
 const {UserInputError} = require("apollo-server-express")
@@ -93,9 +93,22 @@ module.exports = {
             let result = await mongodb_room_queries.reactivate_room(context.db_structure, args._id)
             
             return result
-        }
+        },
 
+        async bulk_follow_rooms(parent, args, context){
+            console.log(args.user_input)
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
 
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            const bulk_follow_room_object = args.user_input
+            //TODO:validating the input
+            
+            let result = await mongodb_room_queries.bulk_follow_rooms(context.db_structure, bulk_follow_room_object)
+            return result            
+        }   
 
     },
 

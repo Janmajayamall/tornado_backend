@@ -139,6 +139,29 @@ async function unfollow_room(db_structure, follow_object){
     return room_res
 }
 
+//this should only be used when you are sure that no rooms in bulk_follow_object already being followed by user
+//If any of the rooms in the request is already being followed by user, then this will result in redundancy & glitches
+//Also you cannot user bulk_follow for reactivation as of now
+async function bulk_follow_rooms(db_structure, bulk_follow_room_object){
+
+    //populating all the room_follow objects
+    let popu_follow_room_object = []
+    bulk_follow_room_object.forEach(follow_object => {
+        popu_follow_room_object.push({
+            ...follow_object,
+            room_id:ObjectID(follow_object.room_id),
+            follower_id:ObjectID(follow_object.follower_id),
+            timestamp:new Date(),
+            last_modified:new Date(),
+            status:"ACTIVE"
+        })
+    });
+
+    let bulk_follow_result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).insertMany(popu_follow_room_object)
+    return bulk_follow_result.ops
+
+}
+
 //queries resolvers
 
 async function find_followed_rooms(db_structure, user_id){
@@ -379,6 +402,7 @@ module.exports = {
     reactivate_room,
     follow_room,
     unfollow_room,
+    bulk_follow_rooms,
 
     //queries
     find_followed_rooms,

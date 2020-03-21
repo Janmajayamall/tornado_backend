@@ -220,8 +220,9 @@ module.exports = gql`
 
         #rooms
         create_room(user_input:room_input):Room!,
-        deactivate_room(_id:ID!):Room!,
+        deactivate_room(_id:ID!):Room!, 
         follow_room(user_input:follow_room_input):Follow_room!,
+        bulk_follow_rooms(user_input:[follow_room_input!]!):[Follow_room!]!
         reactivate_room(_id:ID!):Room!,
         unfollow_room(user_input:follow_room_input):Follow_room!,
 
