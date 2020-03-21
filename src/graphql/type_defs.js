@@ -60,6 +60,18 @@ module.exports = gql`
         creator_id:ID!
     }
 
+    # room with members_count & user follow bool 
+    type Room_demographic {
+        _id:ID!,
+        name:String!,
+        status:String!,
+        timestamp:String!,
+        last_modified:String!,
+        creator_id:ID!,
+        room_members_count:Int!,
+        user_follows:Boolean!
+    }
+
     # Mutation room input type  TODO:You might want to change status to ENUM from String
     input room_input {
         name:String!,
@@ -148,7 +160,8 @@ module.exports = gql`
         room_ids:[ID!]!,
         timestamp:String!,
         last_modified:String!,
-        status:String!
+        status:String!,
+        post_type:String!
     }   
 
     type Room_post_feed {
@@ -161,6 +174,7 @@ module.exports = gql`
         timestamp:String!,
         last_modified:String!,
         status:String!,
+        post_type:String!
         creator_info:User_account!,
         likes_count:Int!,
         user_liked:Boolean!,
@@ -181,6 +195,7 @@ module.exports = gql`
         vid_url:String,
         description:String,
         room_ids:[ID!]!,
+        post_type:String!
     }
 
     #Query room_post_feed 
@@ -233,6 +248,10 @@ module.exports = gql`
         #comments
         get_post_comments(user_input:get_post_comments_input):[Comment_with_creator!]!
 
+        #rooms
+        get_all_rooms:[Room_demographic!]!
+        get_not_joined_rooms:[Room_demographic!]!
+        get_all_joined_rooms:[Room_demographic!]!
     }   
 
 

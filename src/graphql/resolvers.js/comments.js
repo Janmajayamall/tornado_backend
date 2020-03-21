@@ -8,9 +8,9 @@ module.exports = {
     Mutation:{
 
         async create_comment(parent, args, context){
-
+            console.log(args.user_input)
             //verifying jwt
-            verify_jwt(context.req_headers.authorization)
+            await verify_jwt(context.req_headers.authorization)
 
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
@@ -27,7 +27,7 @@ module.exports = {
         async edit_comment(parent, args, context){
 
             //verifying jwt
-            verify_jwt(context.req_headers.authorization)
+            await (context.req_headers.authorization)
 
             //checking for db instance int the context
             db_instance_validation(context.db_structure.main_db)
@@ -46,7 +46,7 @@ module.exports = {
         async deactivate_comment(parent, args, context){
 
             //verifying jwt
-            verify_jwt(context.req_headers.authorization)
+            await verify_jwt(context.req_headers.authorization)
 
             //checking for db instance int the context
             db_instance_validation(context.db_structure.main_db)

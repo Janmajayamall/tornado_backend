@@ -14,6 +14,7 @@ module.exports = {
     },
     Query:{
         ...room_post_resolvers.Query,
-        ...comment_resolvers.Query
+        ...comment_resolvers.Query,
+        ...room_resolvers.Queries
     }
 }

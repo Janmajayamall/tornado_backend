@@ -3,18 +3,21 @@ const {validator_wrapper,
         create_room_validation, 
         follow_room_validation, 
         unfollow_room_validation,
-        objectid_validation
+        objectid_validation,
         } = require("./../../utils/validator")
+const {db_instance_validation,} = require("./../../utils/general_checks")
 const {UserInputError} = require("apollo-server-express")
+const {verify_jwt} = require("./../../utils/authentication")
 
 module.exports = {
     Mutation:{
         async create_room(parent, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             const room_object = args.user_input
 
@@ -27,10 +30,11 @@ module.exports = {
 
         async deactivate_room(parent, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             //validate the id
             validator_wrapper(objectid_validation(args._id))
@@ -43,13 +47,13 @@ module.exports = {
 
         async follow_room(parent, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             const follow_room_object = args.user_input
-
             //validating the input
             validator_wrapper(follow_room_validation(follow_room_object))
 
@@ -60,13 +64,13 @@ module.exports = {
 
         async unfollow_room(parent, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             const unfollow_room_object = args.user_input
-
             //validating the input 
             validator_wrapper(unfollow_room_validation(unfollow_room_object))
 
@@ -77,10 +81,11 @@ module.exports = {
 
         async reactivate_room(parent, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             //validate the id
             validator_wrapper(objectid_validation(args._id))
@@ -90,6 +95,52 @@ module.exports = {
             return result
         }
 
+
+
+    },
+
+    Queries:{
+        async get_all_rooms(parent, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+            console.log(user_id)
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //getting all the rooms
+            const result = await mongodb_room_queries.get_rooms(context.db_structure, user_id)
+            return result
+        
+        },
+
+        async get_not_joined_rooms(parent, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+            // console.log(user_id)
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //getting all the rooms
+            const result = await mongodb_room_queries.get_not_joined_rooms(context.db_structure, user_id)
+            return result
+        
+        },
+
+        async get_all_joined_rooms(parent, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+            // console.log(user_id)
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //getting all the rooms
+            const result = await mongodb_room_queries.get_all_joined_rooms(context.db_structure, user_id)
+            return result
+        
+        },
 
 
     }

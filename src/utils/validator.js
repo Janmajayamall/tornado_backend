@@ -145,6 +145,12 @@ function create_room_post_validation(object){
         });
     }
 
+    if(object.post_type.trim() === ""){
+        errors.post_type = "post_type must not be empty"
+    }else if(!(["ROOM_POST"].includes(object.post_type.trim()))){
+        errors.post_type = `post_type must be any value from ["ROOM_POST"]`
+    }
+
     return {
         errors, 
         valid: Object.keys(errors).length<1

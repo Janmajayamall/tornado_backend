@@ -9,10 +9,11 @@ module.exports = {
         
         async create_room_post(parent, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
             
             const room_post_object = args.user_input
 
@@ -25,15 +26,15 @@ module.exports = {
 
         async edit_room_post(parent, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             //validate the input
             const room_post_edit_object = args.user_input
             const room_post_id = args._id
-
             validator_wrapper(edit_room_post_validation(room_post_edit_object))
             validator_wrapper(objectid_validation(room_post_id))
 
@@ -43,13 +44,13 @@ module.exports = {
 
         async deactivate_room_post(parents, args, context){
 
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
             //checking for db instance in the context
-            if (!context.db_structure.main_db.db_instance){
-                throw new Error("Database Error: main_db instance is null")
-            }
+            db_instance_validation(context.db_structure.main_db)
 
             const room_post_id = args._id
-
             //validate the input
             validator_wrapper(objectid_validation(room_post_id))
 
@@ -62,9 +63,10 @@ module.exports = {
     Query:{
 
         async get_room_posts_user_id(parents, args, context){
+            
             //authenticating user request and identifying user_id
             const user_id = await verify_jwt(context.req_headers.authorization)
-            console.log(user_id, "dasw")
+
             //validating main_db instance
             db_instance_validation(context.db_structure.main_db)
 
