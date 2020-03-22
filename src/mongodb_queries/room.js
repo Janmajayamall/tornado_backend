@@ -164,6 +164,7 @@ async function bulk_follow_rooms(db_structure, bulk_follow_room_object){
 
 //queries resolvers
 
+//this is just an helper function for get_room_posts_user_id
 async function find_followed_rooms(db_structure, user_id){
     const room_objects = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).find({follower_id:ObjectID(user_id)}).toArray()
     return room_objects
@@ -199,7 +200,8 @@ async function get_all_rooms(db_structure, user_id){
                         $expr:{
                             $and:[
                                 {$eq:["$room_id", "$$room_identification"]},
-                                {$eq:["$follower_id", ObjectID(user_id)]}
+                                {$eq:["$follower_id", ObjectID(user_id)]},
+                                {$eq:["$status", "ACTIVE"]}
                                 ],
                             }
                         }
@@ -257,7 +259,8 @@ async function get_not_joined_rooms(db_structure, user_id){
                     $expr:{
                         $and:[
                             {$eq:["$room_id", "$$room_identification"]},
-                            {$eq:["$follower_id", ObjectID("5e75478bf17249628df8693b") ]} //TODO: change this to user_id
+                            {$eq:["$follower_id", ObjectID(user_id) ]},
+                            {$eq:["$status", "ACTIVE" ]} 
                             ],
                         }
                     }
@@ -337,7 +340,8 @@ async function get_all_joined_rooms(db_structure, user_id){
                         $expr:{
                             $and:[
                                 {$eq:["$room_id", "$$room_identification"]},
-                                {$eq:["$follower_id", ObjectID(user_id) ]}
+                                {$eq:["$follower_id", ObjectID(user_id) ]},
+                                {$eq:["$status","ACTIVE"]}
                                 ],
                             }
                         }
@@ -392,7 +396,6 @@ async function get_all_joined_rooms(db_structure, user_id){
     return rooms
 
 }
-
 
 module.exports = {
 
@@ -466,3 +469,69 @@ module.exports = {
 //     ],
 //     as:"room_info"
 // }},
+
+
+//TODO: Getting room details
+
+// async function get_room_details(db_structure, room_id){
+
+//     const room_object = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
+//         [
+//             {$match: {_id:ObjectID(room_id)}},
+//             {$lookup:{
+//                 from:db_structure.main_db.collections.room_follows,
+//                 let:{room_identification:"$_id"},
+//                 pipeline:[
+//                     {$match:{
+//                         $expr:{
+//                             $and:[
+//                                 {$eq:["$room_id", "$$room_identification"]},
+//                                 {$eq:["$follower_id", ObjectID(user_id) ]},
+//                                 {$eq:["$status", "ACTIVE" ]}
+//                                 ],
+//                             }
+//                         }
+//                     },
+//                 ],
+//                 as:"user_follow_room_dev"
+//             }},
+//             {$addFields:{
+//                 user_follows_rooms:{
+//                     $cond:{
+//                         if: {$eq:[{$size:"$user_follow_room_dev"}, 0]},
+//                         then:false,
+//                         else:true
+//                     } 
+//                 },
+//             }},
+//             {$match: {user_follows_rooms:true}},
+//             {$lookup:{
+//                 from:db_structure.main_db.collections.room_follows,
+//                 let:{room_identification:"$_id"},
+//                 pipeline:[
+//                     {$match:{
+//                         $expr:{
+//                             $and:[
+//                                 {$eq:["$room_id", "$$room_identification"]},
+//                                 ],
+//                             }
+//                         }
+//                     },
+//                     {$count:"members_count"}
+//                 ],
+//                 as:"room_members_count_dev"
+//             }},
+//             {$addFields:{
+//                 user_follows:true,
+//                 room_members_count:{
+//                     $cond:{
+//                         if: {$eq:[{$size:"$room_members_count_dev"}, 0]},
+//                         then:0,
+//                         else:{$arrayElemAt: [ "$room_members_count_dev.members_count", 0 ] }
+//                     } 
+//                 }
+//             }},
+//         ]
+//     )
+
+// }

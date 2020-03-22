@@ -204,6 +204,13 @@ module.exports = gql`
         room_post_cursor:String
     }
 
+    #Query room_details_feed
+    input room_details_feed {
+        limit:Int!, 
+        room_post_cursor:String, 
+        room_id:ID!
+    }
+
     #Mutation edit_room_post
     input edit_room_post_input {
         img_url:String,
@@ -245,6 +252,7 @@ module.exports = gql`
 
         #room_post
         get_room_posts_user_id(user_input:room_post_feed):Room_post_cursor,
+        get_room_posts_room_id(user_input:room_details_feed):Room_post_cursor,
 
         #comments
         get_post_comments(user_input:get_post_comments_input):[Comment_with_creator!]!

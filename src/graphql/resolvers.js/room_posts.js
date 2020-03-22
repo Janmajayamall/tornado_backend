@@ -79,6 +79,23 @@ module.exports = {
             const result = await mongodb_room_post_queries.get_room_posts_user_id(context.db_structure, user_id, get_room_post_object)
             return result
 
+        },
+
+        async get_room_posts_room_id(parents, args, context){
+
+            //authenticating user request and identifying user_id
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //validating main_db instance
+            db_instance_validation(context.db_structure.main_db)
+
+            const get_room_post_object = args.user_input
+            //validating the input 
+            validator_wrapper(get_room_post_object_validation(get_room_post_object))
+
+            //getting the result
+            const result = await mongodb_room_post_queries.get_room_posts_room_id(context.db_structure, user_id, get_room_post_object)
+            return result            
         }
 
     }
