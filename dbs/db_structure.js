@@ -8,7 +8,8 @@ module.exports = {
             room_follows:"room_follows",
             room_posts:"room_posts",
             likes:"likes",
-            comments:"comments"
+            comments:"comments",
+            images:"images"
         },
         db_instance:null
     },

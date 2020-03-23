@@ -27,14 +27,13 @@ initialising_mongodb.connect_all_db().then(async database_connections => {
     await collections.create_room_post_collection(db_structure)
     await collections.create_likes_collection(db_structure)
     await collections.create_comments_collection(db_structure)
+    await collections.create_images_collection(db_structure)
     
 })
 
 
-
 // Initialising the app 
 const app = express()
-
 
 //Initialising ApolloServer
 const server = new ApolloServer({
@@ -43,11 +42,14 @@ const server = new ApolloServer({
     context:({req})=>{
         return({
             db_structure:db_structure,
-            req_headers:req.headers
+            req_headers:req.headers,
+            
         })
 
     }   
 })
+
+
 server.applyMiddleware({app})
 
 //Starting the server

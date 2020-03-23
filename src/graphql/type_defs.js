@@ -219,6 +219,13 @@ module.exports = gql`
         room_ids:[ID!],
     }
 
+    #Query aws s3 getPresigned url input
+    input get_image_upload_url_input{
+        file_name:String!, 
+        file_type:String!,
+        file_extension:String!
+    }
+
     type Mutation {
 
         #user
@@ -246,6 +253,8 @@ module.exports = gql`
         create_room_post(user_input:create_room_post_input):Room_post!
         edit_room_post(_id:ID!, user_input:edit_room_post_input):Room_post!
         deactivate_room_post(_id:ID!):Room_post!
+
+
     }
 
     type Query {
@@ -261,6 +270,10 @@ module.exports = gql`
         get_all_rooms:[Room_demographic!]!
         get_not_joined_rooms:[Room_demographic!]!
         get_all_joined_rooms:[Room_demographic!]!
+
+        #aws s3 image upload access 
+        get_image_upload_url(user_input:get_image_upload_url_input):String!
+    
     }   
 
 

@@ -34,3 +34,7 @@ https://www.youtube.com/watch?v=JmFSGqbmzT4&list=PL55RiY5tL51rG1x02Yyj93iypUuHYX
 1.https://www.youtube.com/watch?v=YBydg_Ui02Q&list=PLMhAeHCz8S3_CTiWMQhL6YxX7vZ7z84Zo
 2. https://medium.com/swlh/everything-you-need-to-know-about-the-passport-jwt-passport-js-strategy-8b69f39014b0  (good, wel detailed)
 3. 
+
+
+## Gudie on AWS
+1. IAM policy guide link: https://start.jcolemorrison.com/aws-iam-policies-in-a-nutshell/#overview

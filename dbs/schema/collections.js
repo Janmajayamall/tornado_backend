@@ -290,6 +290,46 @@ async function create_comments_collection(main_db){
 }
 
 
+//images
+async function create_images_collection(main_db){
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.images, {
+        validator:{
+            $jsonSchema:{
+                bsonType:"object",
+                required:["image_url", "width", "height", "timestamp", "last_modified", "status"],
+                properties:{
+                    image_url:{
+                        bsonType:"string",
+                        description:"image_url must be a string and is required"
+                    },
+                    width:{
+                        bsonType:"int",
+                        description:"width must be int and is required"
+                    },
+                    height:{
+                        bsonType:"int",
+                        description:"height must be int and is required"
+                    },
+                    timestamp:{
+                        bsonType:"date",
+                        description:"timestamp must be date(ISODate) and is required"
+                    },
+                    last_modified:{
+                        bsonType:"date",
+                        description:"last_modified must be a date(ISODate) and is required"
+                    },
+                    status:{
+                        enum:["ACTIVE", "NOT_ACTIVE"],
+                        description:"status must be ACTIVE or NOT_ACTIVE and is required"
+                    },
+                }
+            }
+        }  
+    })
+    return result
+}
+
+
 module.exports={
     create_user_collection:create_user_collection,
     create_user_account_collection:create_user_account_collection,
@@ -297,5 +337,6 @@ module.exports={
     create_room_follow_collection:create_room_follow_collection,
     create_likes_collection:create_likes_collection,
     create_comments_collection:create_comments_collection,
-    create_room_post_collection:create_room_post_collection
+    create_room_post_collection:create_room_post_collection,
+    create_images_collection:create_images_collection
 }
