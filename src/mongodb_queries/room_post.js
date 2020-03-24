@@ -2,19 +2,43 @@ const {UserInputError, ApolloError, AuthenticationError} = require("apollo-serve
 const {get_insert_one_result, get_objectids_array} = require("../utils/mongo_queries")
 const {ObjectID} = require("mongodb")
 const mongodb_room_queries = require('./room')
+const {CLOUD_FRONT_URL} = require("./../utils/constants")
 
 async function create_room_post(db_structure, room_post_object){
     //create room_post_value for insert
     let room_post_value = {
-        ...room_post_object,
         creator_id:ObjectID(room_post_object.creator_id),
+        description:room_post_object.description,
         timestamp:new Date(),
         last_modified:new Date(),
         status:"ACTIVE",
-        room_ids:get_objectids_array(room_post_object.room_ids)
+        room_ids:get_objectids_array(room_post_object.room_ids),
+        post_type:room_post_object.post_type
     }
+
+    //if image object is included in the room_post_object
+    let image_object_reference = undefined
+    if(room_post_object.image){
+        const image_object = {
+            ...room_post_object.image,
+            timestamp: new Date(),
+            last_modified: new Date(),
+            status:"ACTIVE"
+        }
+        let image_object_response = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.images).insertOne(image_object)
+        image_object_response = get_insert_one_result(image_object_response)
+        image_object_reference = image_object_response
+        //adding image object _id to room_post_value
+        room_post_value.image = image_object_response._id
+    }
+
     let room_post_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).insertOne(room_post_value)
     room_post_res = get_insert_one_result(room_post_res)
+
+    if (image_object_reference!==undefined){
+        room_post_res.image=image_object_reference
+    }
+
     return room_post_res
 }
 
@@ -138,9 +162,51 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
             }},
             {$lookup:{
                 from:db_structure.main_db.collections.user_accounts,
-                localField:"creator_id",
-                foreignField:"user_id",
+                let:{creator:"$creator_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$user_id", "$$creator"]}
+                    }},
+                    {$lookup:{
+                        from:db_structure.main_db.collections.images,
+                        let:{image_id:"$avatar"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$_id", "$$image_id"]}
+                            }},
+                            {$addFields:{
+                                cdn_url:CLOUD_FRONT_URL
+                            }}
+                        ],                        
+                        as:"avatar_dev"
+                    }},
+                    {$addFields:{
+                        avatar:{
+                            $cond:{
+                                if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: ["$avatar_dev", 0]}
+                            }
+                        }
+                    }}, 
+                    {$project:{
+                        avatar_dev:0
+                    }}
+                ],
                 as:"creator_info_dev"
+            }},
+            {$lookup:{
+                from:db_structure.main_db.collections.images,
+                let:{image_id:"$image"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$_id", "$$image_id"]}
+                    }},
+                    {$addFields:{
+                        cdn_url:CLOUD_FRONT_URL
+                    }}
+                ],
+                as:"image_dev"
             }},
             {
                 $project:{
@@ -151,8 +217,7 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                     room_ids: 1,
                     timestamp:1, 
                     last_modified: 1,
-                    status: 1,
-                    vid_url:1,
+                    status: 1,                    
                     likes_count:{
                         $cond:{
                             if: {$eq:[{$size:"$likes_count_dev"}, 0]},
@@ -173,6 +238,13 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                             if: {$eq:[{$size:"$creator_info_dev"}, 0]},
                             then:null,
                             else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                        }
+                    },
+                    image:{
+                        $cond:{
+                            if: {$eq:[{$size:"$image_dev"}, 0]},
+                            then:null,
+                            else:{$arrayElemAt: ["$image_dev", 0]}
                         }
                     }
                 }
@@ -282,9 +354,51 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
             }},
             {$lookup:{
                 from:db_structure.main_db.collections.user_accounts,
-                localField:"creator_id",
-                foreignField:"user_id",
+                let:{creator:"$creator_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$user_id", "$$creator"]}
+                    }},
+                    {$lookup:{
+                        from:db_structure.main_db.collections.images,
+                        let:{image_id:"$avatar"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$_id", "$$image_id"]}
+                            }},
+                            {$addFields:{
+                                cdn_url:CLOUD_FRONT_URL
+                            }}
+                        ],                        
+                        as:"avatar_dev"
+                    }},
+                    {$addFields:{
+                        avatar:{
+                            $cond:{
+                                if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: ["$avatar_dev", 0]}
+                            }
+                        }
+                    }}, 
+                    {$project:{
+                        avatar_dev:0
+                    }}
+                ],
                 as:"creator_info_dev"
+            }},
+            {$lookup:{
+                from:db_structure.main_db.collections.images,
+                let:{image_id:"$image"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$_id", "$$image_id"]}
+                    }},
+                    {$addFields:{
+                        cdn_url:CLOUD_FRONT_URL
+                    }}
+                ],
+                as:"image_dev"
             }},
             {
                 $project:{
@@ -296,7 +410,6 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                     timestamp:1, 
                     last_modified: 1,
                     status: 1,
-                    vid_url:1,
                     likes_count:{
                         $cond:{
                             if: {$eq:[{$size:"$likes_count_dev"}, 0]},
@@ -317,6 +430,13 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                             if: {$eq:[{$size:"$creator_info_dev"}, 0]},
                             then:null,
                             else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                        }
+                    },
+                    image:{
+                        $cond:{
+                            if: {$eq:[{$size:"$image_dev"}, 0]},
+                            then:null,
+                            else:{$arrayElemAt: ["$image_dev", 0]}
                         }
                     }
                 }

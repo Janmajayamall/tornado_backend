@@ -177,9 +177,8 @@ module.exports = gql`
     type Room_post {
         _id:ID!, 
         creator_id:ID!, 
-        img_url:String, 
-        vid_url:String, 
-        description:String,
+        image:Image, 
+        description:String!,
         room_ids:[ID!]!,
         timestamp:String!,
         last_modified:String!,
@@ -190,9 +189,8 @@ module.exports = gql`
     type Room_post_feed {
         _id:ID!, 
         creator_id:ID!, 
-        img_url:String, 
-        vid_url:String, 
-        description:String,
+        image:Image, 
+        description:String!,
         room_ids:[ID!]!,
         timestamp:String!,
         last_modified:String!,
@@ -214,11 +212,10 @@ module.exports = gql`
     #Mutation create_room_post
     input create_room_post_input {
         creator_id:ID!,
-        img_url:String,
-        vid_url:String,
-        description:String,
+        image:image_input,
+        description:String!,
         room_ids:[ID!]!,
-        post_type:String!
+        post_type:String!,
     }
 
     #Query room_post_feed 

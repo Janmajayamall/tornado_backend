@@ -164,6 +164,14 @@ function create_room_post_validation(object){
         errors.post_type = `post_type must be any value from ["ROOM_POST"]`
     }
 
+    if(object.image){
+        if(!(object.image.image_name && object.image.width && object.image.height)){
+            errors.image = "image must be an object with properties: image_name, width, height"
+        }
+    }
+
+    //TODO: Set limitations on characters for each string input
+
     return {
         errors, 
         valid: Object.keys(errors).length<1
@@ -172,7 +180,7 @@ function create_room_post_validation(object){
 }
 
 function edit_room_post_validation(object){
-    
+
     errors={}
 
     if(object.room_ids.length === 0){

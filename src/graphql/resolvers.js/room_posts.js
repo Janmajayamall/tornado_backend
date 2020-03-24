@@ -25,7 +25,7 @@ module.exports = {
         },
 
         async edit_room_post(parent, args, context){
-
+            //TODO: change the edit room post. Limit it to updating the room ids, description, and links -- you can leave editing the image for now 
             //authenticating the user
             await verify_jwt(context.req_headers.authorization)
 

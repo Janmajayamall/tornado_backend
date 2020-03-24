@@ -163,23 +163,23 @@ async function create_room_post_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["creator_id", "timestamp", "last_modified", "status", "room_ids"],
+                required:["creator_id", "timestamp", "last_modified", "status", "room_ids", "post_type", "status", "description"],
                 properties:{
                     creator_id:{
                         bsonType:"objectId",
                         description:"creator_id must be a objectId and is required"
                     },
-                    img_url:{
-                        bsonType:"string",
-                        description:"img_url must be a string and is required"
+                    image:{
+                        bsonType:"objectId",
+                        description:"image must be a objectId and is optional"
                     },
                     description:{
                         bsonType:"string",
-                        description:"description must be string and is required"
+                        description:"description must be string and is optional"
                     },
                     room_ids:{
                         bsonType:"array",
-                        description:"rooms must be array and is optional"
+                        description:"rooms must be array and is required"
                     },
                     timestamp:{
                         bsonType:"date",
