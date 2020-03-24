@@ -39,7 +39,7 @@ async function create_user_account_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["user_id", "age", "username", "avatar", "timestamp", "last_modified", "name"],
+                required:["user_id", "age", "username", "timestamp", "last_modified", "name", "default_avatar"],
                 properties:{
                     user_id:{
                         bsonType:"objectId",
@@ -54,8 +54,8 @@ async function create_user_account_collection(main_db){
                         description:"username must be a string and is required"
                     },
                     avatar:{
-                        bsonType:"string",
-                        description:"avatar must be a url(type:string) and is required"
+                        bsonType:"objectId",
+                        description:"avatar must be objectId and is optional"
                     },
                     timestamp:{
                         bsonType:"date",
@@ -76,8 +76,11 @@ async function create_user_account_collection(main_db){
                     bio:{
                         bsonType:"string",
                         description:"description must be string and is optional"
+                    },
+                    default_avatar:{
+                        bsonType:"bool",
+                        description:"default_avatar is boolean and is required"
                     }
-
                 }
             }
         }
@@ -169,10 +172,6 @@ async function create_room_post_collection(main_db){
                     img_url:{
                         bsonType:"string",
                         description:"img_url must be a string and is required"
-                    },
-                    vid_url:{
-                        bsonType:"string",
-                        description:"vid_url must be a string and is required"
                     },
                     description:{
                         bsonType:"string",
@@ -296,11 +295,11 @@ async function create_images_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["image_url", "width", "height", "timestamp", "last_modified", "status"],
+                required:["image_name", "width", "height", "timestamp", "last_modified", "status"],
                 properties:{
-                    image_url:{
+                    image_name:{
                         bsonType:"string",
-                        description:"image_url must be a string and is required"
+                        description:"image_id must be a string and is required"
                     },
                     width:{
                         bsonType:"int",
@@ -321,7 +320,7 @@ async function create_images_collection(main_db){
                     status:{
                         enum:["ACTIVE", "NOT_ACTIVE"],
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
-                    },
+                    }
                 }
             }
         }  

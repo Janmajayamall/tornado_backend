@@ -18,6 +18,7 @@ module.exports = {
                     errors: validation_result.errors
                 })
             }
+            
 
             result = await mongodb_user_queries.register_user(context.db_structure, user_object)
 

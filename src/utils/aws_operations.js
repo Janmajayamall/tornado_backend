@@ -1,7 +1,7 @@
 const AWS = require("aws-sdk")
 const {IMAGE_STORAGE_BUCKET_AWS} = require("./constants")
 
-async function get_signed_url_put_object(file_name, file_type, file_extension){
+async function get_signed_url_put_object(file_name, file_mime){
 
     //Initialising AWS s3
     AWS.config.update({
@@ -11,11 +11,9 @@ async function get_signed_url_put_object(file_name, file_type, file_extension){
         signatureVersion: 'v4',
     })
     const s3 = new AWS.S3({signatureVersion:"v4"})
-    const key_name=`${file_name}.${file_extension}`
-    const bucket_name=IMAGE_STORAGE_BUCKET_AWS
 
-    const params = {Bucket:bucket_name, Key:key_name, Expires:60*5, ContentType:`${file_type}/${file_extension}`}
-
+    const params = {Bucket:IMAGE_STORAGE_BUCKET_AWS, Key:file_name, Expires:60*5, ContentType:file_mime}
+    console.log(process.env.AWS_ACCESS_KEY_ID,params)
     var pre_signed_url = await s3.getSignedUrl("putObject", params)
     return pre_signed_url
 

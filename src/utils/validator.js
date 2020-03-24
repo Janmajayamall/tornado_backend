@@ -33,6 +33,19 @@ function user_register_validation(user_object){
         errors.age = "age must not be empty, and should be Int"   
     }
 
+    if(user_object.default_avatar==undefined){
+        errors.default_avatar = "default_avatar must not be empty, and should be Boolean"   
+    }
+
+    if(user_object.default_avatar===false){
+        if(!user_object.avatar){
+            errors.avatar = "avatar must be an object, with properties file name, width, height"
+        }
+    }
+
+    //TODO: add validation for three_words, name, bio, 
+
+
 
     return {
         errors,

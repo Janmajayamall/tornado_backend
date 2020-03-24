@@ -21,7 +21,7 @@ module.exports = {
             //TODO: validate image_object
 
             try{
-                const url = await get_signed_url_put_object(context.s3, image_object)
+                const url = await get_signed_url_put_object(image_object.file_name, image_object.file_mime)
                 return url
             }catch(e){
                 throw new Error("AWS S3 not able to obtain presigned url")

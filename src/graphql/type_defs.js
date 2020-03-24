@@ -9,14 +9,15 @@ module.exports = gql`
     type User {
         _id:ID!,
         username:String!,
-        avatar:String!,
+        avatar:Image,
         jwt:String,
         email:String,
         age:Int,
         name:String, 
         three_words:String,
         bio:String,
-        user_id:String!
+        user_id:String!,
+        default_avatar:Boolean!
     }
 
     #user account type
@@ -25,12 +26,25 @@ module.exports = gql`
         user_id:ID!,
         age:Int!, 
         username:String!, 
-        avatar:String!,
         timestamp:String!, 
         last_modified:String!,
         name:String, 
         three_words:String,
         bio:String,
+        avatar:Image,
+        default_avatar:Boolean!
+    }
+
+    # image type 
+    type Image {
+        _id:ID!, 
+        image_name:String!, 
+        width:Int!, 
+        height:Int!
+        timestamp:String!,
+        last_modified:String!, 
+        cdn_url:String!,
+        status:String!
     }
     
     # Mutation register_user input
@@ -41,7 +55,16 @@ module.exports = gql`
         username:String!,
         name:String!, 
         three_words:String!,
-        bio:String!
+        bio:String!,
+        avatar:image_input,
+        default_avatar:Boolean!
+    }
+
+    # image input
+    input image_input {
+        image_name:String!, 
+        width:Int!, 
+        height:Int!
     }
 
     # Mutation login_user input
@@ -222,8 +245,7 @@ module.exports = gql`
     #Query aws s3 getPresigned url input
     input get_image_upload_url_input{
         file_name:String!, 
-        file_type:String!,
-        file_extension:String!
+        file_mime:String!,
     }
 
     type Mutation {
