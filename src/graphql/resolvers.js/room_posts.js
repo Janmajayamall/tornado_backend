@@ -16,7 +16,7 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
             
             const room_post_object = args.user_input
-
+            console.log(room_post_object)
             //validate the input
             validator_wrapper(create_room_post_validation(room_post_object))
 

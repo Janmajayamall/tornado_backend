@@ -84,8 +84,8 @@ function create_room_validation(object){
 
     if(object.name.trim() === ""){
         errors.name="name must not be empty"
-    }else if(object.length>150){
-        errors.name="please choose a shorted name (room name must not be more than 150 characters)"
+    }else if(object.length>75){
+        errors.name="please choose a shorter name (room name must not be more than 75 characters)"
     }
 
     if(object.creator_id.trim() === ""){
@@ -93,6 +93,8 @@ function create_room_validation(object){
     }else if(!is_valid_objectid(object.creator_id)){
         errors.creator_id = "creator_id is not a valid ObjectID"
     }
+
+    //TODO: validate the length of the short description as well
     
     return {
         errors, 

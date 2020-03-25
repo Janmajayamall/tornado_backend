@@ -36,6 +36,8 @@ async function create_room_post(db_structure, room_post_object){
     room_post_res = get_insert_one_result(room_post_res)
 
     if (image_object_reference!==undefined){
+        //adding cdn url to image_object_reference 
+        image_object_reference.cdn_url = CLOUD_FRONT_URL
         room_post_res.image=image_object_reference
     }
 
@@ -281,6 +283,8 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
         room_post_cursor:new_cursor
 
     }
+
+    console.log(result)
     
     return result
 

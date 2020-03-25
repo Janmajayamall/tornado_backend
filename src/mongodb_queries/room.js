@@ -29,12 +29,15 @@ async function create_room(db_structure, room_object){
         creator_id:ObjectID(room_object.creator_id),
         timestamp:new Date(),
         last_modified:new Date(),
-        status:"ACTIVE"
+        status:"ACTIVE",
     }
     
     let room_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).insertOne(room_value)
     room_res = get_insert_one_result(room_res)
     const follow_res = await follow_room(db_structure, {room_id:room_res._id, follower_id:room_res.creator_id})
+
+    room_res.room_members_count=1
+    room_res.user_follows=true
 
     return room_res
 

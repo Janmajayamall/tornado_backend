@@ -115,6 +115,10 @@ async function create_room_collection(main_db){
                     status:{
                         enum:["ACTIVE", "NOT_ACTIVE"],
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
+                    },
+                    description:{
+                        bsonType:"string",
+                        description:"description must be a string and is required"
                     }
                 }
             }
@@ -163,7 +167,7 @@ async function create_room_post_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["creator_id", "timestamp", "last_modified", "status", "room_ids", "post_type", "status", "description"],
+                required:["creator_id", "timestamp", "last_modified", "room_ids", "post_type", "status", "description"],
                 properties:{
                     creator_id:{
                         bsonType:"objectId",

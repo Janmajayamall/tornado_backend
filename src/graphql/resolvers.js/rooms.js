@@ -20,7 +20,6 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             const room_object = args.user_input
-
             //Validate create_room input
             validator_wrapper(create_room_validation(room_object))
 
