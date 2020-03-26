@@ -227,6 +227,31 @@ function get_room_post_object_validation(object){
 
 }
 
+function get_user_profile_posts_validation(object){
+
+    errors = {}
+
+    if (object.limit<1){
+        errors.limit = "limit specified should be greater than 0 and is required"
+    }
+
+    if (object.room_post_cursor){
+
+        try{
+            let result = date_validation(object.room_post_cursor)
+        }catch(e){
+            errors.room_post_cursor = "room_post_cursor should be Date object in milliseconds"
+        }
+
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
 
 
 
@@ -397,6 +422,7 @@ module.exports = {
     create_room_post_validation,
     edit_room_post_validation,
     get_room_post_object_validation,
+    get_user_profile_posts_validation,
 
     //likes queries/mutations
     create_like_validation, 
