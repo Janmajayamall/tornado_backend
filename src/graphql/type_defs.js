@@ -282,7 +282,7 @@ module.exports = gql`
         #room_post
         get_room_posts_user_id(user_input:room_post_feed):Room_post_cursor,
         get_room_posts_room_id(user_input:room_details_feed):Room_post_cursor,
-        get_user_profile_posts(user_input:room_post_feed):Room_post_cursor
+        get_user_profile_posts(user_input:room_post_feed):Room_post_cursor,
 
         #comments
         get_post_comments(user_input:get_post_comments_input):[Comment_with_creator!]!

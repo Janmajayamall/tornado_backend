@@ -248,7 +248,8 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                             then:null,
                             else:{$arrayElemAt: ["$image_dev", 0]}
                         }
-                    }
+                    },
+                    post_type:1
                 }
             }
         ]
@@ -442,7 +443,8 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                             then:null,
                             else:{$arrayElemAt: ["$image_dev", 0]}
                         }
-                    }
+                    },
+                    post_type:1
                 }
             }
         ]
@@ -635,7 +637,8 @@ async function get_user_profile_posts(db_structure, user_id, get_user_profile_po
                             then:null,
                             else:{$arrayElemAt: ["$image_dev", 0]}
                         }
-                    }
+                    },
+                    post_type:1
                 }
             }
         ]
@@ -670,6 +673,8 @@ async function get_user_profile_posts(db_structure, user_id, get_user_profile_po
         room_post_cursor:new_cursor
 
     }
+
+    console.log(result)
 
     return result
 
