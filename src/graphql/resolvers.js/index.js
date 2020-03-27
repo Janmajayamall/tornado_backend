@@ -17,6 +17,7 @@ module.exports = {
         ...room_post_resolvers.Query,
         ...comment_resolvers.Query,
         ...room_resolvers.Queries,
-        ...aws_operations_resolvers.Query
+        ...aws_operations_resolvers.Query,
+        ...user_resolvers.Query
     }
 }

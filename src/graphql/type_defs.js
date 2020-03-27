@@ -11,13 +11,14 @@ module.exports = gql`
         username:String!,
         avatar:Image,
         jwt:String,
-        email:String,
         age:Int,
         name:String, 
         three_words:String,
         bio:String,
         user_id:String!,
-        default_avatar:Boolean!
+        default_avatar:Boolean!,
+        timestamp:String!,
+        last_modified:String!
     }
 
     #user account type
@@ -32,7 +33,7 @@ module.exports = gql`
         three_words:String,
         bio:String,
         avatar:Image,
-        default_avatar:Boolean!
+        default_avatar:Boolean!,
     }
 
     # image type 
@@ -71,6 +72,16 @@ module.exports = gql`
     input login_user_input {
         email:String!,
         password:String!
+    }
+
+    # Mutation edit_user_profile input
+    input edit_user_profile_input{
+        username:String!,
+        name:String!,
+        bio:String!, 
+        three_words:String!,
+        avatar:image_input,
+        last_avatar_id:ID,
     }
 
     # room info type
@@ -251,6 +262,7 @@ module.exports = gql`
         #user
         register_user(user_input:register_user_input):User!,
         login_user(user_input:login_user_input):User!,
+        edit_user_profile(user_input:edit_user_profile_input):User_account!
 
         #rooms
         create_room(user_input:room_input):Room_demographic!,
@@ -295,6 +307,9 @@ module.exports = gql`
         #aws s3 image upload access 
         get_image_upload_url(user_input:get_image_upload_url_input):String!
     
+        #user
+        get_user_info:User_account!
+
     }   
 
 

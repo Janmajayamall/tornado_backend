@@ -1,6 +1,7 @@
 const {UserInputError, ApolloError, AuthenticationError} = require("apollo-server-express")
 const {get_insert_one_result} = require("../utils/mongo_queries")
 const {ObjectID} = require("mongodb")
+const { CLOUD_FRONT_URL } = require("./../utils/constants")
 
 async function create_comment(db_structure, comment_object){
 
@@ -61,10 +62,39 @@ async function get_post_comments(db_structure, comment_query_object){
 
     const comments_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.comments).aggregate([
         {$match: {status:"ACTIVE", content_id:ObjectID(comment_query_object.content_id), content_type:comment_query_object.content_type}},
-        {$lookup: {
+        {$lookup:{
             from:db_structure.main_db.collections.user_accounts,
-            localField:"user_id",
-            foreignField:"user_id",
+            let:{creator:"$user_id"},
+            pipeline:[
+                {$match:{
+                    $expr:{$eq:["$user_id", "$$creator"]}
+                }},
+                {$lookup:{
+                    from:db_structure.main_db.collections.images,
+                    let:{image_id:"$avatar"},
+                    pipeline:[
+                        {$match:{
+                            $expr:{$eq:["$_id", "$$image_id"]}
+                        }},
+                        {$addFields:{
+                            cdn_url:CLOUD_FRONT_URL
+                        }}
+                    ],                        
+                    as:"avatar_dev"
+                }},
+                {$addFields:{
+                    avatar:{
+                        $cond:{
+                            if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                            then:null,
+                            else:{$arrayElemAt: ["$avatar_dev", 0]}
+                        }
+                    }
+                }}, 
+                {$project:{
+                    avatar_dev:0
+                }}
+            ],
             as:"creator_info_dev"
         }},
         {$addFields:{
@@ -73,8 +103,8 @@ async function get_post_comments(db_structure, comment_query_object){
                     if: {$eq:[{$size:"$creator_info_dev"}, 0]},
                     then:null,
                     else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
-                } 
-            }
+                }
+            },
         }},
         {$project:{
             creator_info_dev:0
