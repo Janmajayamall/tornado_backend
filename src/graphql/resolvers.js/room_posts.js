@@ -101,20 +101,25 @@ module.exports = {
         async get_user_profile_posts(parents, args, context){
 
             //authenticating user request and identifying user_id
-            const user_id = await verify_jwt(context.req_headers.authorization)
+            const current_user_id = await verify_jwt(context.req_headers.authorization)
 
             //validating main_db instance
             db_instance_validation(context.db_structure.main_db)
 
-            const get_user_profile_posts_object = args.user_input
+            let get_user_profile_posts_object = args.user_input
+            //checking whether user_id is present or not, if not then populating it with current_user_id
+            if(!get_user_profile_posts_object.user_id){
+                get_user_profile_posts_object.user_id=current_user_id
+            }
             //validating the input 
             validator_wrapper(get_user_profile_posts_validation(get_user_profile_posts_object))
 
             //getting the result
-            const result = await mongodb_room_post_queries.get_user_profile_posts(context.db_structure, user_id, get_user_profile_posts_object)
+            const result = await mongodb_room_post_queries.get_user_profile_posts(context.db_structure, get_user_profile_posts_object)
             return result            
         }
 
+    
     }
 
 }

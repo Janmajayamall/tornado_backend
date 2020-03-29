@@ -1,6 +1,7 @@
 const {UserInputError, ApolloError, AuthenticationError} = require("apollo-server-express")
 const {get_insert_one_result} = require("../utils/mongo_queries")
 const {ObjectID} = require("mongodb")
+const { CLOUD_FRONT_URL } = require("./../utils/constants")
 
 //mutations resolvers
 
@@ -222,6 +223,41 @@ async function get_all_rooms(db_structure, user_id){
                 ],
                 as:"user_follows_dev"
             }},
+            {$lookup:{
+                from:db_structure.main_db.collections.user_accounts,
+                let:{creator:"$creator_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$user_id", "$$creator"]}
+                    }},
+                    {$lookup:{
+                        from:db_structure.main_db.collections.images,
+                        let:{image_id:"$avatar"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$_id", "$$image_id"]}
+                            }},
+                            {$addFields:{
+                                cdn_url:CLOUD_FRONT_URL
+                            }}
+                        ],                        
+                        as:"avatar_dev"
+                    }},
+                    {$addFields:{
+                        avatar:{
+                            $cond:{
+                                if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: ["$avatar_dev", 0]}
+                            }
+                        }
+                    }}, 
+                    {$project:{
+                        avatar_dev:0
+                    }}
+                ],
+                as:"creator_info_dev"
+            }},
             {$addFields:{
                 room_members_count:{
                     $cond:{
@@ -236,11 +272,19 @@ async function get_all_rooms(db_structure, user_id){
                         then:false,
                         else:{$arrayElemAt: [ "$user_follows_dev.did_user_follow", 0 ] }
                     } 
-                }
+                },
+                creator_info:{
+                    $cond:{
+                        if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                        then:null,
+                        else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                    }
+                },
             }},
             {$project:{
                 room_members_count_dev:0,
-                user_follows_dev:0
+                user_follows_dev:0,
+                creator_info_dev:0
             }}
         ]
     ).toArray()
@@ -307,6 +351,41 @@ async function get_not_joined_rooms(db_structure, user_id){
             ],
             as:"room_members_count_dev"
         }},
+        {$lookup:{
+            from:db_structure.main_db.collections.user_accounts,
+            let:{creator:"$creator_id"},
+            pipeline:[
+                {$match:{
+                    $expr:{$eq:["$user_id", "$$creator"]}
+                }},
+                {$lookup:{
+                    from:db_structure.main_db.collections.images,
+                    let:{image_id:"$avatar"},
+                    pipeline:[
+                        {$match:{
+                            $expr:{$eq:["$_id", "$$image_id"]}
+                        }},
+                        {$addFields:{
+                            cdn_url:CLOUD_FRONT_URL
+                        }}
+                    ],                        
+                    as:"avatar_dev"
+                }},
+                {$addFields:{
+                    avatar:{
+                        $cond:{
+                            if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                            then:null,
+                            else:{$arrayElemAt: ["$avatar_dev", 0]}
+                        }
+                    }
+                }}, 
+                {$project:{
+                    avatar_dev:0
+                }}
+            ],
+            as:"creator_info_dev"
+        }},
         {$addFields:{
             user_follows:false,
             room_members_count:{
@@ -315,11 +394,19 @@ async function get_not_joined_rooms(db_structure, user_id){
                     then:0,
                     else:{$arrayElemAt: [ "$room_members_count_dev.members_count", 0 ] }
                 } 
-            }
+            },
+            creator_info:{
+                $cond:{
+                    if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                    then:null,
+                    else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                }
+            },
         }},
         {$project:{
             user_join:0,
-            user_join_dev:0
+            user_join_dev:0,
+            creator_info_dev:0
         }}
         
     ]).toArray()
@@ -331,7 +418,6 @@ async function get_not_joined_rooms(db_structure, user_id){
 
 async function get_all_joined_rooms(db_structure, user_id){
 
-    //getting the rooms with populated bool value of whether user follows the room or not
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
         [
             {$match: {status:"ACTIVE"}},
@@ -353,7 +439,7 @@ async function get_all_joined_rooms(db_structure, user_id){
                 as:"user_follow_room_dev"
             }},
             {$addFields:{
-                user_follows_rooms:{
+                user_follows:{
                     $cond:{
                         if: {$eq:[{$size:"$user_follow_room_dev"}, 0]},
                         then:false,
@@ -361,7 +447,7 @@ async function get_all_joined_rooms(db_structure, user_id){
                     } 
                 },
             }},
-            {$match: {user_follows_rooms:true}},
+            {$match: {user_follows:true}},
             {$lookup:{
                 from:db_structure.main_db.collections.room_follows,
                 let:{room_identification:"$_id"},
@@ -378,6 +464,259 @@ async function get_all_joined_rooms(db_structure, user_id){
                 ],
                 as:"room_members_count_dev"
             }},
+            {$lookup:{
+                from:db_structure.main_db.collections.user_accounts,
+                let:{creator:"$creator_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$user_id", "$$creator"]}
+                    }},
+                    {$lookup:{
+                        from:db_structure.main_db.collections.images,
+                        let:{image_id:"$avatar"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$_id", "$$image_id"]}
+                            }},
+                            {$addFields:{
+                                cdn_url:CLOUD_FRONT_URL
+                            }}
+                        ],                        
+                        as:"avatar_dev"
+                    }},
+                    {$addFields:{
+                        avatar:{
+                            $cond:{
+                                if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: ["$avatar_dev", 0]}
+                            }
+                        }
+                    }}, 
+                    {$project:{
+                        avatar_dev:0
+                    }}
+                ],
+                as:"creator_info_dev"
+            }},
+            {$addFields:{
+                room_members_count:{
+                    $cond:{
+                        if: {$eq:[{$size:"$room_members_count_dev"}, 0]},
+                        then:0,
+                        else:{$arrayElemAt: [ "$room_members_count_dev.members_count", 0 ] }
+                    } 
+                },
+                creator_info:{
+                    $cond:{
+                        if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                        then:null,
+                        else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                    }
+                },
+            }},
+            {$project:{
+                user_follow_room_dev:0,
+                room_members_count_dev:0,
+                creator_info_dev:0
+            }}
+        ]
+    ).toArray()
+
+    return rooms
+
+}
+
+async function get_all_created_rooms(db_structure, creator_user_id, current_user_id){
+    //getting the rooms with populated bool value of whether user follows the room or not
+    const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
+        [
+            {$match: {status:"ACTIVE", creator_id:ObjectID(creator_user_id)}},
+            {$lookup:{
+                from:db_structure.main_db.collections.room_follows,
+                let:{room_identification:"$_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{
+                            $and:[
+                                {$eq:["$room_id", "$$room_identification"]},
+                                {$eq:["$follower_id", ObjectID(current_user_id) ]},
+                                {$eq:["$status","ACTIVE"]}
+                                ],
+                            }
+                        }
+                    },
+                ],
+                as:"user_follow_room_dev"
+            }},
+            {$lookup:{
+                from:db_structure.main_db.collections.room_follows,
+                let:{room_identification:"$_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{
+                            $and:[
+                                {$eq:["$room_id", "$$room_identification"]},
+                                ],
+                            }
+                        }
+                    },
+                    {$count:"members_count"}
+                ],
+                as:"room_members_count_dev"
+            }},
+            {$lookup:{
+                from:db_structure.main_db.collections.user_accounts,
+                let:{creator:"$creator_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$user_id", "$$creator"]}
+                    }},
+                    {$lookup:{
+                        from:db_structure.main_db.collections.images,
+                        let:{image_id:"$avatar"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$_id", "$$image_id"]}
+                            }},
+                            {$addFields:{
+                                cdn_url:CLOUD_FRONT_URL
+                            }}
+                        ],                        
+                        as:"avatar_dev"
+                    }},
+                    {$addFields:{
+                        avatar:{
+                            $cond:{
+                                if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: ["$avatar_dev", 0]}
+                            }
+                        }
+                    }}, 
+                    {$project:{
+                        avatar_dev:0
+                    }}
+                ],
+                as:"creator_info_dev"
+            }},
+            {$addFields:{
+                room_members_count:{
+                    $cond:{
+                        if: {$eq:[{$size:"$room_members_count_dev"}, 0]},
+                        then:0,
+                        else:{$arrayElemAt: [ "$room_members_count_dev.members_count", 0 ] }
+                    } 
+                },
+                creator_info:{
+                    $cond:{
+                        if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                        then:null,
+                        else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                    }
+                },
+                user_follows:{
+                    $cond:{
+                        if: {$eq:[{$size:"$user_follow_room_dev"}, 0]},
+                        then:false,
+                        else:true
+                    } 
+                }
+            }},
+            {$project:{
+                user_follow_room_dev:0,
+                creator_info_dev:0,
+                room_members_count_dev:0
+            }}
+        ]
+    ).toArray()
+    return rooms
+}
+
+async function get_common_rooms(db_structure, user_id_arr){
+
+    //convert all id strings into objectIds
+    const user_id_arr_objectid = []
+    user_id_arr.forEach(user_id => {
+        user_id_arr_objectid.push(ObjectID(user_id))
+    });
+    console.log(user_id_arr_objectid)
+    //getting all room_follows object matching any user_id in the user_id_arr
+    const common_room_ids_obj = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).aggregate(
+        [
+            {$match:{follower_id:{$in: user_id_arr_objectid}}},
+            {
+                $group: {_id:"$room_id", count:{$sum:1}}
+            },
+            {$match:{count:{$gte:user_id_arr_objectid.length}}},
+            {$project:{
+                _id:1
+            }}
+        ]
+    ).toArray()
+    let common_room_ids = []
+    console.log(common_room_ids_obj, 'aw')
+    common_room_ids_obj.forEach(room_obj=>{
+        common_room_ids.push(room_obj._id)
+    })
+    console.log("common room ids ",common_room_ids )
+
+    //getting the rooms with populated bool value of whether user follows the room or not
+    const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
+        [
+
+            {$match: {status:"ACTIVE", _id:{$in:common_room_ids}}},
+            {$lookup:{
+                from:db_structure.main_db.collections.room_follows,
+                let:{room_identification:"$_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{
+                            $and:[
+                                {$eq:["$room_id", "$$room_identification"]},
+                                ],
+                            }
+                        }
+                    },
+                    {$count:"members_count"}
+                ],
+                as:"room_members_count_dev"
+            }},
+            {$lookup:{
+                from:db_structure.main_db.collections.user_accounts,
+                let:{creator:"$creator_id"},
+                pipeline:[
+                    {$match:{
+                        $expr:{$eq:["$user_id", "$$creator"]}
+                    }},
+                    {$lookup:{
+                        from:db_structure.main_db.collections.images,
+                        let:{image_id:"$avatar"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$_id", "$$image_id"]}
+                            }},
+                            {$addFields:{
+                                cdn_url:CLOUD_FRONT_URL
+                            }}
+                        ],                        
+                        as:"avatar_dev"
+                    }},
+                    {$addFields:{
+                        avatar:{
+                            $cond:{
+                                if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: ["$avatar_dev", 0]}
+                            }
+                        }
+                    }}, 
+                    {$project:{
+                        avatar_dev:0
+                    }}
+                ],
+                as:"creator_info_dev"
+            }},
             {$addFields:{
                 user_follows:true,
                 room_members_count:{
@@ -386,6 +725,13 @@ async function get_all_joined_rooms(db_structure, user_id){
                         then:0,
                         else:{$arrayElemAt: [ "$room_members_count_dev.members_count", 0 ] }
                     } 
+                },
+                creator_info:{
+                    $cond:{
+                        if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                        then:null,
+                        else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                    }
                 }
             }},
             {$project:{
@@ -397,7 +743,111 @@ async function get_all_joined_rooms(db_structure, user_id){
     ).toArray()
 
     return rooms
+}
 
+async function get_room_demographics(db_structure, room_id, user_id){
+
+    const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate([
+        {$match:{_id:ObjectID(room_id)}},
+        {$lookup:{
+            from:db_structure.main_db.collections.room_follows,
+            let:{room_identification:"$_id"},
+            pipeline:[
+                {$match:{
+                    $expr:{
+                        $and:[
+                            {$eq:["$room_id", "$$room_identification"]},
+                            {$eq:["$follower_id", ObjectID(user_id) ]},
+                            {$eq:["$status","ACTIVE"]}
+                            ],
+                        }
+                    }
+                },
+            ],
+            as:"user_follow_room_dev"
+        }},
+        {$lookup:{
+            from:db_structure.main_db.collections.room_follows,
+            let:{room_identification:"$_id"},
+            pipeline:[
+                {$match:{
+                    $expr:{
+                        $and:[
+                            {$eq:["$room_id", "$$room_identification"]},
+                            ],
+                        }
+                    }
+                },
+                {$count:"members_count"}
+            ],
+            as:"room_members_count_dev"
+        }},
+        {$lookup:{
+            from:db_structure.main_db.collections.user_accounts,
+            let:{creator:"$creator_id"},
+            pipeline:[
+                {$match:{
+                    $expr:{$eq:["$user_id", "$$creator"]}
+                }},
+                {$lookup:{
+                    from:db_structure.main_db.collections.images,
+                    let:{image_id:"$avatar"},
+                    pipeline:[
+                        {$match:{
+                            $expr:{$eq:["$_id", "$$image_id"]}
+                        }},
+                        {$addFields:{
+                            cdn_url:CLOUD_FRONT_URL
+                        }}
+                    ],                        
+                    as:"avatar_dev"
+                }},
+                {$addFields:{
+                    avatar:{
+                        $cond:{
+                            if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                            then:null,
+                            else:{$arrayElemAt: ["$avatar_dev", 0]}
+                        }
+                    }
+                }}, 
+                {$project:{
+                    avatar_dev:0
+                }}
+            ],
+            as:"creator_info_dev"
+        }},
+        {$addFields:{            
+            room_members_count:{
+                $cond:{
+                    if: {$eq:[{$size:"$room_members_count_dev"}, 0]},
+                    then:0,
+                    else:{$arrayElemAt: [ "$room_members_count_dev.members_count", 0 ] }
+                } 
+            },
+            creator_info:{
+                $cond:{
+                    if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                    then:null,
+                    else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                }
+            },
+            user_follows:{
+                $cond:{
+                    if: {$eq:[{$size:"$user_follow_room_dev"}, 0]},
+                    then:false,
+                    else:true
+                } 
+            }
+        }},
+        {$project:{
+            user_follow_room_dev:0,
+            room_members_count_dev:0,
+            creator_info_dev:0
+        }}
+
+    ]).toArray()
+    return rooms[0]
 }
 
 module.exports = {
@@ -414,127 +864,13 @@ module.exports = {
     find_followed_rooms,
     get_all_rooms,
     get_not_joined_rooms,
-    get_all_joined_rooms
+    get_all_joined_rooms,
+    get_all_created_rooms,
+    get_common_rooms,
+    get_room_demographics
+
 
 }
 
 
 
-//extra lines
-
-// {$match:{follower_id:{$not:{$eq:ObjectID("5e75478bf17249628df8693b")}}, status:"ACTIVE"}},
-// {$project:{
-//     room_id:1
-// }},
-// {
-//     $group: {
-//         _id: "$room_id"
-//     }
-// },
-// {$lookup:{
-//     from:db_structure.main_db.collections.rooms,
-//     let:{room_identification:"$_id"},
-//     pipeline:[
-//         {$match:{
-//             $expr:{
-//                 $and:[
-//                     {$eq:["$_id", "$$room_identification"]},
-//                     {$eq:["$status", ]}
-//                     ],
-//                 }
-//             }
-//         },
-//         {$count:"user_follow_count"},
-//         {$project:{
-//             did_user_follow:{
-//                 $cond:{
-//                     if:{ $eq:[0, "$user_follow_count"]},
-//                     then: false,
-//                     else: true
-//                 }
-//             }
-//         }},
-//     ],
-//     as:"user_follows_dev"
-// }}{$lookup:{
-//     from:db_structure.main_db.collections.rooms,
-//     let:{room_identification:"$room_id"},
-//     pipeline:[
-//         {$match:{
-//             $expr:{
-//                 $and:[
-//                     {$eq:["$_id", "$$room_identification"]},
-//                     ],
-//                 }
-//             }
-//         },
-        
-//     ],
-//     as:"room_info"
-// }},
-
-
-//TODO: Getting room details
-
-// async function get_room_details(db_structure, room_id){
-
-//     const room_object = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
-//         [
-//             {$match: {_id:ObjectID(room_id)}},
-//             {$lookup:{
-//                 from:db_structure.main_db.collections.room_follows,
-//                 let:{room_identification:"$_id"},
-//                 pipeline:[
-//                     {$match:{
-//                         $expr:{
-//                             $and:[
-//                                 {$eq:["$room_id", "$$room_identification"]},
-//                                 {$eq:["$follower_id", ObjectID(user_id) ]},
-//                                 {$eq:["$status", "ACTIVE" ]}
-//                                 ],
-//                             }
-//                         }
-//                     },
-//                 ],
-//                 as:"user_follow_room_dev"
-//             }},
-//             {$addFields:{
-//                 user_follows_rooms:{
-//                     $cond:{
-//                         if: {$eq:[{$size:"$user_follow_room_dev"}, 0]},
-//                         then:false,
-//                         else:true
-//                     } 
-//                 },
-//             }},
-//             {$match: {user_follows_rooms:true}},
-//             {$lookup:{
-//                 from:db_structure.main_db.collections.room_follows,
-//                 let:{room_identification:"$_id"},
-//                 pipeline:[
-//                     {$match:{
-//                         $expr:{
-//                             $and:[
-//                                 {$eq:["$room_id", "$$room_identification"]},
-//                                 ],
-//                             }
-//                         }
-//                     },
-//                     {$count:"members_count"}
-//                 ],
-//                 as:"room_members_count_dev"
-//             }},
-//             {$addFields:{
-//                 user_follows:true,
-//                 room_members_count:{
-//                     $cond:{
-//                         if: {$eq:[{$size:"$room_members_count_dev"}, 0]},
-//                         then:0,
-//                         else:{$arrayElemAt: [ "$room_members_count_dev.members_count", 0 ] }
-//                     } 
-//                 }
-//             }},
-//         ]
-//     )
-
-// }

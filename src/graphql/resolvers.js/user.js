@@ -1,5 +1,5 @@
 const mongodb_user_queries = require("./../../mongodb_queries/user")
-const {user_register_validation, user_login_validation,} = require("./../../utils/validator")
+const {user_register_validation, user_login_validation, validator_wrapper, objectid_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 const {db_instance_validation} = require("./../../utils/general_checks")
 const {verify_jwt} = require("./../../utils/authentication")
@@ -75,6 +75,22 @@ module.exports = {
 
             const result = await mongodb_user_queries.get_user_info(context.db_structure, user_id)
             return result
+        },
+
+        async get_other_user_info(parent, args, context){
+
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //extracting other_user_id and validating it
+            const other_user_id = args.other_user_id
+            validator_wrapper(objectid_validation(other_user_id))
+
+            const result = await mongodb_user_queries.get_user_info(context.db_structure, user_id)
+            return result        
         }
 
     }

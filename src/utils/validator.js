@@ -245,6 +245,10 @@ function get_user_profile_posts_validation(object){
 
     }
 
+    if (!is_valid_objectid(object.user_id)){
+        error.user_id = "user_id should be a objectId"
+    }
+
     return {
         errors, 
         valid: Object.keys(errors).length<1

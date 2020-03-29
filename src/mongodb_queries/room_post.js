@@ -3,6 +3,7 @@ const {get_insert_one_result, get_objectids_array} = require("../utils/mongo_que
 const {ObjectID} = require("mongodb")
 const mongodb_room_queries = require('./room')
 const {CLOUD_FRONT_URL} = require("./../utils/constants")
+const { get_user_info } = require("./user")
 
 async function create_room_post(db_structure, room_post_object){
     //create room_post_value for insert
@@ -33,15 +34,30 @@ async function create_room_post(db_structure, room_post_object){
     }
 
     let room_post_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).insertOne(room_post_value)
-    room_post_res = get_insert_one_result(room_post_res)
+    room_post_res = get_insert_one_result(room_post_res) //post has been created
 
+    //populating image
     if (image_object_reference!==undefined){
         //adding cdn url to image_object_reference 
         image_object_reference.cdn_url = CLOUD_FRONT_URL
         room_post_res.image=image_object_reference
     }
+    
+    //populating likes_count & user_liked
+    room_post_res.likes_count=0
+    room_post_res.user_liked=false
 
-    return room_post_res
+    //getting room_objects
+    const room_objects = await await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).find({_id:{$in:room_post_res.room_ids}}).toArray()
+    room_post_res.room_objects=room_objects
+
+    //creator_info
+    const creator_info = await get_user_info(db_structure, room_post_res.creator_id)
+    room_post_res.creator_info=creator_info
+
+    console.log("this. is. true.", room_post_res)
+
+    return room_post_res 
 }
 
 async function deactivate_room_post(db_structure, room_post_id){
@@ -84,22 +100,11 @@ async function edit_room_post(db_structure, room_post_id, room_post_edit_object)
 }
 
 //queries
-
 async function get_room_posts_user_id(db_structure, user_id, get_room_post_object){
-    
+
     //CONSTANTS
     const POST_LIMIT = 5
     const ROOM_POST_CURSOR = (new Date().getTime()).toString()
-    
-    //find rooms followed by the user
-    const room_objects_arr = await mongodb_room_queries.find_followed_rooms(db_structure,user_id)
-    if (room_objects_arr.length === 0){
-        return []
-    }
-    const follow_room_ids = []
-    room_objects_arr.forEach(room_object => {
-        follow_room_ids.push(ObjectID(room_object.room_id))
-    });
 
     //fixing the get_room_post_object
     if (!get_room_post_object.limit){
@@ -108,8 +113,25 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
     if (!get_room_post_object.room_post_cursor){
         get_room_post_object.room_post_cursor = ROOM_POST_CURSOR
     }
+    
+    //find rooms followed by the user
+    const room_objects_arr = await mongodb_room_queries.find_followed_rooms(db_structure,user_id)
+    if (room_objects_arr.length === 0){
+        //user is member of no room 
+        return({
+            room_posts:[],
+            next_page: false,
+            limit:get_room_post_object.limit,
+            last_room_post_cursor:get_room_post_object.room_post_cursor,
+            room_post_cursor:get_room_post_object.room_post_cursor
+        })
+    }
+    const follow_room_ids = []
+    room_objects_arr.forEach(room_object => {
+        follow_room_ids.push(ObjectID(room_object.room_id))
+    });
 
-
+    
     // getting the posts    
     const room_posts_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).aggregate(
         [
@@ -210,6 +232,17 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                 ],
                 as:"image_dev"
             }},
+            {$lookup: {
+                from:db_structure.main_db.collections.rooms,
+                let:{values_arr:`$room_ids`},
+                pipeline:[
+                    {$match:{
+                            $expr:{$in:["$_id", "$$values_arr"]}
+                        }
+                    }
+                ],
+                as:'room_objects'
+            }},
             {
                 $project:{
                     _id:1,
@@ -249,12 +282,12 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                             else:{$arrayElemAt: ["$image_dev", 0]}
                         }
                     },
-                    post_type:1
+                    post_type:1,
+                    room_objects:1
                 }
             }
         ]
-    ).toArray()
-
+    ).toArray() 
     //more posts left after this
     let has_more = false
 
@@ -284,8 +317,6 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
         room_post_cursor:new_cursor
 
     }
-
-    console.log(result)
     
     return result
 
@@ -405,6 +436,17 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                 ],
                 as:"image_dev"
             }},
+            {$lookup: {
+                from:db_structure.main_db.collections.rooms,
+                let:{values_arr:`$room_ids`},
+                pipeline:[
+                    {$match:{
+                            $expr:{$in:["$_id", "$$values_arr"]}
+                        }
+                    }
+                ],
+                as:'room_objects'
+            }},
             {
                 $project:{
                     _id:1,
@@ -444,7 +486,8 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                             else:{$arrayElemAt: ["$image_dev", 0]}
                         }
                     },
-                    post_type:1
+                    post_type:1,
+                    room_objects:1
                 }
             }
         ]
@@ -484,7 +527,10 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
 
 }
 
-async function get_user_profile_posts(db_structure, user_id, get_user_profile_posts_object){    
+async function get_user_profile_posts(db_structure, get_user_profile_posts_object){    
+
+    //extracting user_id
+    const {user_id} = get_user_profile_posts_object
 
     //CONSTANTS
     const POST_LIMIT = 5
@@ -599,6 +645,17 @@ async function get_user_profile_posts(db_structure, user_id, get_user_profile_po
                 ],
                 as:"image_dev"
             }},
+            {$lookup: {
+                from:db_structure.main_db.collections.rooms,
+                let:{values_arr:`$room_ids`},
+                pipeline:[
+                    {$match:{
+                            $expr:{$in:["$_id", "$$values_arr"]}
+                        }
+                    }
+                ],
+                as:'room_objects'
+            }},
             {
                 $project:{
                     _id:1,
@@ -638,12 +695,13 @@ async function get_user_profile_posts(db_structure, user_id, get_user_profile_po
                             else:{$arrayElemAt: ["$image_dev", 0]}
                         }
                     },
-                    post_type:1
+                    post_type:1,
+                    room_objects:1
                 }
             }
         ]
     ).toArray()
-    
+        
     //more posts left after this
     let has_more = false
 

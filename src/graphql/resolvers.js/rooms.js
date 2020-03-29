@@ -121,7 +121,7 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             //getting all the rooms
-            const result = await mongodb_room_queries.get_rooms(context.db_structure, user_id)
+            const result = await mongodb_room_queries.get_all_rooms(context.db_structure, user_id)
             return result
         
         },
@@ -143,10 +143,19 @@ module.exports = {
         async get_all_joined_rooms(parent, args, context){
 
             //authenticating the user
-            const user_id = await verify_jwt(context.req_headers.authorization)
-            // console.log(user_id)
+            const current_user_id = await verify_jwt(context.req_headers.authorization)
+            
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
+
+            //extracting user_id from args
+            let user_id = args.user_id
+            console.log(user_id, "here")
+            //populating user _id
+            if(!user_id){
+                user_id = current_user_id
+            }
+            validator_wrapper(objectid_validation(user_id))
 
             //getting all the rooms
             const result = await mongodb_room_queries.get_all_joined_rooms(context.db_structure, user_id)
@@ -154,6 +163,57 @@ module.exports = {
         
         },
 
+
+        async get_all_created_rooms(parent, args, context){
+
+            //authenticating the user
+            const current_user_id = await verify_jwt(context.req_headers.authorization)
+            
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+           
+            //extracting user_id from args
+            let user_id = args.user_id
+            //populating user _id
+            if(!user_id){
+                user_id = current_user_id
+            }
+            validator_wrapper(objectid_validation(user_id))
+            
+            //getting all the rooms
+            const result = await mongodb_room_queries.get_all_created_rooms(context.db_structure, user_id)
+            return result
+        },
+
+        async get_common_rooms(parent, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //extract user_id arr & TODO: validate them 
+            let user_ids = args.user_ids
+            //pushing current user_id
+            user_ids.push(user_id)
+            console.log("arrr", user_ids)
+
+            //getting all the rooms
+            const result = await mongodb_room_queries.get_common_rooms(context.db_structure, user_ids)
+            return result
+        },
+
+        async get_room_demographics(parent, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //extracting room_id 
+            const room_id = args.room_id
+            //validating room_id
+            validator_wrapper(objectid_validation(room_id))
+
+            const result = await mongodb_room_queries.get_room_demographics(context.db_structure, room_id, user_id )
+            return result
+        }
 
     }
 }

@@ -91,7 +91,8 @@ module.exports = gql`
         status:String!,
         timestamp:String!,
         last_modified:String!,
-        creator_id:ID!
+        creator_id:ID!,
+        description:String!
     }
 
     # room with members_count & user follow bool 
@@ -102,8 +103,10 @@ module.exports = gql`
         timestamp:String!,
         last_modified:String!,
         creator_id:ID!,
+        creator_info:User_account!, 
         room_members_count:Int!,
-        user_follows:Boolean!
+        user_follows:Boolean!,
+        description:String!
     }
 
     # Mutation room input type  TODO:You might want to change status to ENUM from String
@@ -211,6 +214,7 @@ module.exports = gql`
         creator_info:User_account!,
         likes_count:Int!,
         user_liked:Boolean!,
+        room_objects:[Room!]!
     }
 
     type Room_post_cursor {
@@ -234,6 +238,13 @@ module.exports = gql`
     input room_post_feed {
         limit:Int!,
         room_post_cursor:String
+    }
+
+    #Query room_post_other_user_id_feed
+    input get_user_profile_posts_input {
+        limit:Int!,
+        room_post_cursor:String,
+        user_id:ID
     }
 
     #Query room_details_feed
@@ -282,7 +293,7 @@ module.exports = gql`
         edit_comment(_id:ID!, user_input:edit_comment_input):Comment!
 
         #room_posts
-        create_room_post(user_input:create_room_post_input):Room_post!
+        create_room_post(user_input:create_room_post_input):Room_post_feed!
         edit_room_post(_id:ID!, user_input:edit_room_post_input):Room_post!
         deactivate_room_post(_id:ID!):Room_post!
 
@@ -294,7 +305,7 @@ module.exports = gql`
         #room_post
         get_room_posts_user_id(user_input:room_post_feed):Room_post_cursor,
         get_room_posts_room_id(user_input:room_details_feed):Room_post_cursor,
-        get_user_profile_posts(user_input:room_post_feed):Room_post_cursor,
+        get_user_profile_posts(user_input:get_user_profile_posts_input):Room_post_cursor,
 
         #comments
         get_post_comments(user_input:get_post_comments_input):[Comment_with_creator!]!
@@ -302,13 +313,17 @@ module.exports = gql`
         #rooms
         get_all_rooms:[Room_demographic!]!
         get_not_joined_rooms:[Room_demographic!]!
-        get_all_joined_rooms:[Room_demographic!]!
+        get_all_joined_rooms(user_id:ID):[Room_demographic!]!
+        get_all_created_rooms(user_id:ID):[Room_demographic!]!
+        get_common_rooms(user_ids:[ID!]!):[Room_demographic!]!
+        get_room_demographics(room_id:ID!):Room_demographic!
 
         #aws s3 image upload access 
         get_image_upload_url(user_input:get_image_upload_url_input):String!
     
         #user
         get_user_info:User_account!
+        get_other_user_info(other_user_id:ID!):User_account!
 
     }   
 
