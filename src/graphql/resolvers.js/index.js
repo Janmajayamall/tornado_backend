@@ -4,6 +4,7 @@ const room_post_resolvers = require("./room_posts")
 const comment_resolvers = require("./comments")
 const like_resolvers = require("./likes")
 const aws_operations_resolvers = require("./aws_operations")
+const captions_resolvers = require("./captions")
 
 module.exports = {
     Mutation:{
@@ -11,7 +12,8 @@ module.exports = {
         ...room_resolvers.Mutation,
         ...room_post_resolvers.Mutation,
         ...comment_resolvers.Mutation,
-        ...like_resolvers.Mutation
+        ...like_resolvers.Mutation,
+        ...captions_resolvers.Mutation
     },
     Query:{
         ...room_post_resolvers.Query,

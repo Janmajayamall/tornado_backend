@@ -9,7 +9,8 @@ module.exports = {
             room_posts:"room_posts",
             likes:"likes",
             comments:"comments",
-            images:"images"
+            images:"images",
+            captions:"captions"
         },
         db_instance:null
     },

@@ -28,6 +28,7 @@ initialising_mongodb.connect_all_db().then(async database_connections => {
     await collections.create_likes_collection(db_structure)
     await collections.create_comments_collection(db_structure)
     await collections.create_images_collection(db_structure)
+    await collections.create_captions_collection()
     
 })
 

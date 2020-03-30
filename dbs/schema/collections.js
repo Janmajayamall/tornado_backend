@@ -198,7 +198,7 @@ async function create_room_post_collection(main_db){
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
                     },
                     post_type:{
-                        enum:["ROOM_POST"],
+                        enum:["ROOM_POST", "ROOM_POST_CAPTION"],
                         description:"post_type must be ROOM_POST and is required"
                     }
 
@@ -235,7 +235,7 @@ async function create_likes_collection(main_db){
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
                     },
                     like_type:{
-                        enum:["ROOM_POST", "COMMENT"],
+                        enum:["ROOM_POST", "COMMENT", "ROOM_POST_CAPTION"],
                         description:"like_type must be POST or COMMENT and is required"
                     },
                     content_id:{
@@ -332,6 +332,45 @@ async function create_images_collection(main_db){
     return result
 }
 
+//room_post_caption
+async function create_captions_collection(){
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.captions, {
+        validator:{
+            $jsonSchema:{
+                bsonType:"object",
+                required:["post_id", "creator_id", "timestamp", "last_modified", "status"],
+                properties:{
+                    post_id:{
+                        bsonType:"objectId",
+                        description:"post_id must be a objectId and is required"
+                    },
+                    creator_id:{
+                        bsonType:"objectId",
+                        description:"creator_id must be a objectId and is required"
+                    },
+                    description:{
+                        bsonType:"string",
+                        description:"description must be string and is required"
+                    },
+                    timestamp:{
+                        bsonType:"date",
+                        description:"timestamp must be date(ISODate) and is required"
+                    },
+                    last_modified:{
+                        bsonType:"date",
+                        description:"last_modified must be date(ISODate) and is required"
+                    },
+                    status:{
+                        enum:["ACTIVE", "NOT_ACTIVE"],
+                        description:"status must be ACTIVE or NOT_ACTIVE and is required"
+                    }
+                }
+            }
+        }  
+    })
+    return result
+
+}
 
 module.exports={
     create_user_collection:create_user_collection,
@@ -341,5 +380,6 @@ module.exports={
     create_likes_collection:create_likes_collection,
     create_comments_collection:create_comments_collection,
     create_room_post_collection:create_room_post_collection,
-    create_images_collection:create_images_collection
+    create_images_collection:create_images_collection,
+    create_captions_collection:create_captions_collection
 }

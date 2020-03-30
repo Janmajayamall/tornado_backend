@@ -214,7 +214,19 @@ module.exports = gql`
         creator_info:User_account!,
         likes_count:Int!,
         user_liked:Boolean!,
-        room_objects:[Room!]!
+        room_objects:[Room!]!,
+        caption_objects:[Caption!]
+    }
+
+    type Caption {
+        post_id:ID!,
+        creator_info:User_account!,
+        timestamp:String!,
+        likes_count:Int!, 
+        user_liked:Boolean!,
+        last_modified:String!,
+        status:String!,
+        description:String!
     }
 
     type Room_post_cursor {
@@ -232,6 +244,12 @@ module.exports = gql`
         description:String!,
         room_ids:[ID!]!,
         post_type:String!,
+    }
+
+    #Mutation create_caption_input 
+    input create_caption {
+        post_id:ID!, 
+        description:String!
     }
 
     #Query room_post_feed 
@@ -296,6 +314,9 @@ module.exports = gql`
         create_room_post(user_input:create_room_post_input):Room_post_feed!
         edit_room_post(_id:ID!, user_input:edit_room_post_input):Room_post!
         deactivate_room_post(_id:ID!):Room_post!
+
+        #caption
+        create_caption(user_input:create_caption):Caption!
 
 
     }

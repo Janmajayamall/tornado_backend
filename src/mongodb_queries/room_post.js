@@ -46,10 +46,11 @@ async function create_room_post(db_structure, room_post_object){
     //populating likes_count & user_liked
     room_post_res.likes_count=0
     room_post_res.user_liked=false
-
+    console.log(room_post_res.room_ids, "room_ids")
     //getting room_objects
-    const room_objects = await await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).find({_id:{$in:room_post_res.room_ids}}).toArray()
+    const room_objects = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).find({_id:{$in:room_post_res.room_ids}}).toArray()
     room_post_res.room_objects=room_objects
+    console.log(room_objects, "room_ids")
 
     //creator_info
     const creator_info = await get_user_info(db_structure, room_post_res.creator_id)
@@ -243,8 +244,135 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                 ],
                 as:'room_objects'
             }},
-            {
-                $project:{
+            //lookup for caption object for post type: ROOM_CAPTION_POST 
+            {$lookup: {
+                from:db_structure.main_db.collections.captions,
+                let:{post:`$_id`},
+                pipeline:[
+                    {$match:{
+                            $expr:{$eq:["$post_id", "$$post"]}
+                    }},
+                    {$limit:3},
+                    //lookup for creator info for each caption object
+                    {$lookup:{
+                        from:db_structure.main_db.collections.user_accounts,
+                        let:{creator:"$creator_id"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$user_id", "$$creator"]}
+                            }},
+                            {$lookup:{
+                                from:db_structure.main_db.collections.images,
+                                let:{image_id:"$avatar"},
+                                pipeline:[
+                                    {$match:{
+                                        $expr:{$eq:["$_id", "$$image_id"]}
+                                    }},
+                                    {$addFields:{
+                                        cdn_url:CLOUD_FRONT_URL
+                                    }}
+                                ],                        
+                                as:"avatar_dev"
+                            }},
+                            {$addFields:{
+                                avatar:{
+                                    $cond:{
+                                        if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                        then:null,
+                                        else:{$arrayElemAt: ["$avatar_dev", 0]}
+                                    }
+                                }
+                            }}, 
+                            {$project:{
+                                avatar_dev:0
+                            }}
+                        ],
+                        as:"creator_info_dev"
+                    }},
+                    //lookup for likes count
+                    {$lookup: {
+                        from:db_structure.main_db.collections.likes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
+                                            {$eq:["$status", "ACTIVE"]}
+                                        ],
+                                    }
+                                }
+                            },
+                            {$count:"likes_count"},
+                        ],
+                        as:'likes_count_dev'
+                    }},
+                    //does user likes
+                    {$lookup: {
+                        from:db_structure.main_db.collections.likes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
+                                            {$eq:["$status", "ACTIVE"]},
+                                            {$eq:["$user_id", ObjectID(user_id)]}
+                                        ],
+                                    }
+                                }
+                            },
+                            {$count:"user_like_count"},
+                            {$project:{
+                                did_user_like:{
+                                    $cond:{
+                                        if:{ $eq:[0, "$user_like_count"]},
+                                        then: false,
+                                        else: true
+                                    }
+                                }
+                            }},
+                        ],
+                        as:'user_liked_dev'
+                    }},
+                    {$addFields:{
+                        likes_count:{
+                            $cond:{
+                                if: {$eq:[{$size:"$likes_count_dev"}, 0]},
+                                then:0,
+                                else:{$arrayElemAt: [ "$likes_count_dev.likes_count", 0 ] }
+                            }
+                        },
+                        user_liked:{
+                            $cond:{
+                                if: {$eq:[{$size:"$user_liked_dev"}, 0]},
+                                then:false,
+                                else:{$arrayElemAt: [ "$user_liked_dev.did_user_like", 0 ]}
+                            }
+                            
+                        },
+                        creator_info:{
+                            $cond:{
+                                if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                            }
+                        },
+                    }},
+                    //sorting caption object with likes_count:1 timestamp:-1
+                    {$sort:{
+                        likes_count:1,
+                        timestamp:-1
+                    }},
+                    {$project:{
+                        creator_info_dev:0
+                    }}
+                ],
+                as:'caption_objects'
+            }},
+            {$project:{
                     _id:1,
                     creator_id: 1,
                     img_url: 1,
@@ -283,12 +411,14 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                         }
                     },
                     post_type:1,
-                    room_objects:1
+                    room_objects:1,
+                    caption_objects:1
                 }
             }
         ]
     ).toArray() 
     //more posts left after this
+    console.log(room_posts_list, "dadadad")
     let has_more = false
 
     //length of rooms_post_list
@@ -447,6 +577,134 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                 ],
                 as:'room_objects'
             }},
+            //lookup for caption object for post type: ROOM_CAPTION_POST 
+            {$lookup: {
+                from:db_structure.main_db.collections.captions,
+                let:{post:`$_id`},
+                pipeline:[
+                    {$match:{
+                            $expr:{$eq:["$post_id", "$$post"]}
+                    }},
+                    {$limit:3},
+                    //lookup for creator info for each caption object
+                    {$lookup:{
+                        from:db_structure.main_db.collections.user_accounts,
+                        let:{creator:"$creator_id"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$user_id", "$$creator"]}
+                            }},
+                            {$lookup:{
+                                from:db_structure.main_db.collections.images,
+                                let:{image_id:"$avatar"},
+                                pipeline:[
+                                    {$match:{
+                                        $expr:{$eq:["$_id", "$$image_id"]}
+                                    }},
+                                    {$addFields:{
+                                        cdn_url:CLOUD_FRONT_URL
+                                    }}
+                                ],                        
+                                as:"avatar_dev"
+                            }},
+                            {$addFields:{
+                                avatar:{
+                                    $cond:{
+                                        if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                        then:null,
+                                        else:{$arrayElemAt: ["$avatar_dev", 0]}
+                                    }
+                                }
+                            }}, 
+                            {$project:{
+                                avatar_dev:0
+                            }}
+                        ],
+                        as:"creator_info_dev"
+                    }},
+                    //lookup for likes count
+                    {$lookup: {
+                        from:db_structure.main_db.collections.likes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
+                                            {$eq:["$status", "ACTIVE"]}
+                                        ],
+                                    }
+                                }
+                            },
+                            {$count:"likes_count"},
+                        ],
+                        as:'likes_count_dev'
+                    }},
+                    //does user likes
+                    {$lookup: {
+                        from:db_structure.main_db.collections.likes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
+                                            {$eq:["$status", "ACTIVE"]},
+                                            {$eq:["$user_id", ObjectID(user_id)]}
+                                        ],
+                                    }
+                                }
+                            },
+                            {$count:"user_like_count"},
+                            {$project:{
+                                did_user_like:{
+                                    $cond:{
+                                        if:{ $eq:[0, "$user_like_count"]},
+                                        then: false,
+                                        else: true
+                                    }
+                                }
+                            }},
+                        ],
+                        as:'user_liked_dev'
+                    }},
+                    {$addFields:{
+                        likes_count:{
+                            $cond:{
+                                if: {$eq:[{$size:"$likes_count_dev"}, 0]},
+                                then:0,
+                                else:{$arrayElemAt: [ "$likes_count_dev.likes_count", 0 ] }
+                            }
+                        },
+                        user_liked:{
+                            $cond:{
+                                if: {$eq:[{$size:"$user_liked_dev"}, 0]},
+                                then:false,
+                                else:{$arrayElemAt: [ "$user_liked_dev.did_user_like", 0 ]}
+                            }
+                            
+                        },
+                        creator_info:{
+                            $cond:{
+                                if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                            }
+                        },
+                    }},
+                    //sorting caption object with likes_count:1 timestamp:-1
+                    {$sort:{
+                        likes_count:1,
+                        timestamp:-1
+                    }},
+                    {$project:{
+                        creator_info_dev:0
+                    }}
+                ],
+                as:'caption_objects'
+            }},
             {
                 $project:{
                     _id:1,
@@ -487,7 +745,8 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                         }
                     },
                     post_type:1,
-                    room_objects:1
+                    room_objects:1,
+                    caption_objects:1
                 }
             }
         ]
@@ -656,6 +915,134 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                 ],
                 as:'room_objects'
             }},
+            //lookup for caption object for post type: ROOM_CAPTION_POST 
+            {$lookup: {
+                from:db_structure.main_db.collections.captions,
+                let:{post:`$_id`},
+                pipeline:[
+                    {$match:{
+                            $expr:{$eq:["$post_id", "$$post"]}
+                    }},
+                    {$limit:3},
+                    //lookup for creator info for each caption object
+                    {$lookup:{
+                        from:db_structure.main_db.collections.user_accounts,
+                        let:{creator:"$creator_id"},
+                        pipeline:[
+                            {$match:{
+                                $expr:{$eq:["$user_id", "$$creator"]}
+                            }},
+                            {$lookup:{
+                                from:db_structure.main_db.collections.images,
+                                let:{image_id:"$avatar"},
+                                pipeline:[
+                                    {$match:{
+                                        $expr:{$eq:["$_id", "$$image_id"]}
+                                    }},
+                                    {$addFields:{
+                                        cdn_url:CLOUD_FRONT_URL
+                                    }}
+                                ],                        
+                                as:"avatar_dev"
+                            }},
+                            {$addFields:{
+                                avatar:{
+                                    $cond:{
+                                        if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                                        then:null,
+                                        else:{$arrayElemAt: ["$avatar_dev", 0]}
+                                    }
+                                }
+                            }}, 
+                            {$project:{
+                                avatar_dev:0
+                            }}
+                        ],
+                        as:"creator_info_dev"
+                    }},
+                    //lookup for likes count
+                    {$lookup: {
+                        from:db_structure.main_db.collections.likes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
+                                            {$eq:["$status", "ACTIVE"]}
+                                        ],
+                                    }
+                                }
+                            },
+                            {$count:"likes_count"},
+                        ],
+                        as:'likes_count_dev'
+                    }},
+                    //does user likes
+                    {$lookup: {
+                        from:db_structure.main_db.collections.likes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
+                                            {$eq:["$status", "ACTIVE"]},
+                                            {$eq:["$user_id", ObjectID(user_id)]}
+                                        ],
+                                    }
+                                }
+                            },
+                            {$count:"user_like_count"},
+                            {$project:{
+                                did_user_like:{
+                                    $cond:{
+                                        if:{ $eq:[0, "$user_like_count"]},
+                                        then: false,
+                                        else: true
+                                    }
+                                }
+                            }},
+                        ],
+                        as:'user_liked_dev'
+                    }},
+                    {$addFields:{
+                        likes_count:{
+                            $cond:{
+                                if: {$eq:[{$size:"$likes_count_dev"}, 0]},
+                                then:0,
+                                else:{$arrayElemAt: [ "$likes_count_dev.likes_count", 0 ] }
+                            }
+                        },
+                        user_liked:{
+                            $cond:{
+                                if: {$eq:[{$size:"$user_liked_dev"}, 0]},
+                                then:false,
+                                else:{$arrayElemAt: [ "$user_liked_dev.did_user_like", 0 ]}
+                            }
+                            
+                        },
+                        creator_info:{
+                            $cond:{
+                                if: {$eq:[{$size:"$creator_info_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                            }
+                        },
+                    }},
+                    //sorting caption object with likes_count:1 timestamp:-1
+                    {$sort:{
+                        likes_count:1,
+                        timestamp:-1
+                    }},
+                    {$project:{
+                        creator_info_dev:0
+                    }}
+                ],
+                as:'caption_objects'
+            }},
             {
                 $project:{
                     _id:1,
@@ -696,7 +1083,8 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                         }
                     },
                     post_type:1,
-                    room_objects:1
+                    room_objects:1,
+                    caption_objects:1
                 }
             }
         ]
