@@ -10,7 +10,8 @@ module.exports = {
             likes:"likes",
             comments:"comments",
             images:"images",
-            captions:"captions"
+            captions:"captions",
+            votes:"votes",
         },
         db_instance:null
     },

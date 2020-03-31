@@ -250,7 +250,10 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                 let:{post:`$_id`},
                 pipeline:[
                     {$match:{
-                            $expr:{$eq:["$post_id", "$$post"]}
+                            $expr:{$and:[
+                                {$eq:["$post_id", "$$post"]},
+                                {$eq:["$status", "ACTIVE"]}
+                            ]}
                     }},
                     {$limit:3},
                     //lookup for creator info for each caption object
@@ -289,69 +292,80 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                         ],
                         as:"creator_info_dev"
                     }},
-                    //lookup for likes count
+                    //lookup for up votes count
                     {$lookup: {
-                        from:db_structure.main_db.collections.likes,
+                        from:db_structure.main_db.collections.votes,
                         let:{caption_id:"$_id"},
                         pipeline:[
                             {$match:{
                                     $expr:{
                                         $and:[
                                             {$eq:["$content_id", "$$caption_id"]},
-                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
-                                            {$eq:["$status", "ACTIVE"]}
-                                        ],
-                                    }
-                                }
-                            },
-                            {$count:"likes_count"},
-                        ],
-                        as:'likes_count_dev'
-                    }},
-                    //does user likes
-                    {$lookup: {
-                        from:db_structure.main_db.collections.likes,
-                        let:{caption_id:"$_id"},
-                        pipeline:[
-                            {$match:{
-                                    $expr:{
-                                        $and:[
-                                            {$eq:["$content_id", "$$caption_id"]},
-                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
+                                            {$eq:["$content_type", "CAPTION"]},
                                             {$eq:["$status", "ACTIVE"]},
-                                            {$eq:["$user_id", ObjectID(user_id)]}
+                                            {$eq:["$vote_type", "UP"]}
                                         ],
                                     }
                                 }
                             },
-                            {$count:"user_like_count"},
-                            {$project:{
-                                did_user_like:{
-                                    $cond:{
-                                        if:{ $eq:[0, "$user_like_count"]},
-                                        then: false,
-                                        else: true
+                            {$count:"up_votes"},
+                        ],
+                        as:'up_votes_count_dev'
+                    }},
+                    //lookup for down votes count
+                    {$lookup: {
+                        from:db_structure.main_db.collections.votes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$content_type", "CAPTION"]},
+                                            {$eq:["$status", "ACTIVE"]},
+                                            {$eq:["$vote_type", "DOWN"]}
+                                        ],
                                     }
                                 }
-                            }},
+                            },
+                            {$count:"down_votes"},
                         ],
-                        as:'user_liked_dev'
+                        as:'down_votes_count_dev'
                     }},
+                    //user vote object
+                    {$lookup: {
+                        from:db_structure.main_db.collections.votes,
+                        let:{caption_id:"$_id"},
+                        pipeline:[
+                            {$match:{
+                                    $expr:{
+                                        $and:[
+                                            {$eq:["$content_id", "$$caption_id"]},
+                                            {$eq:["$content_type", "CAPTION"]},
+                                            {$eq:["$status", "ACTIVE"]},
+                                            {$eq:["$creator_id", ObjectID(user_id)]}
+                                        ],
+                                    }
+                                }
+                            }
+                        ],
+                        as:'user_vote_object_dev'
+                    }},
+                    //addfields
                     {$addFields:{
-                        likes_count:{
+                        up_votes_count:{
                             $cond:{
-                                if: {$eq:[{$size:"$likes_count_dev"}, 0]},
+                                if: {$eq:[{$size:"$up_votes_count_dev"}, 0]},
                                 then:0,
-                                else:{$arrayElemAt: [ "$likes_count_dev.likes_count", 0 ] }
+                                else:{$arrayElemAt: [ "$up_votes_count_dev.up_votes", 0 ] }
                             }
                         },
-                        user_liked:{
+                        down_votes_count:{
                             $cond:{
-                                if: {$eq:[{$size:"$user_liked_dev"}, 0]},
-                                then:false,
-                                else:{$arrayElemAt: [ "$user_liked_dev.did_user_like", 0 ]}
+                                if: {$eq:[{$size:"$down_votes_count_dev"}, 0]},
+                                then:0,
+                                else:{$arrayElemAt: [ "$down_votes_count_dev.down_votes", 0 ]}
                             }
-                            
                         },
                         creator_info:{
                             $cond:{
@@ -360,14 +374,24 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                                 else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
                             }
                         },
-                    }},
+                        user_vote_object:{
+                            $cond:{
+                                if: {$eq:[{$size:"$user_vote_object_dev"}, 0]},
+                                then:null,
+                                else:{$arrayElemAt: [ "$user_vote_object_dev", 0 ] }
+                            }
+                        }
+                    }},                    
                     //sorting caption object with likes_count:1 timestamp:-1
                     {$sort:{
                         likes_count:1,
                         timestamp:-1
                     }},
                     {$project:{
-                        creator_info_dev:0
+                        creator_info_dev:0,
+                        up_votes_count_dev:0,
+                        down_votes_count_dev:0,
+                        user_vote_object_dev:0
                     }}
                 ],
                 as:'caption_objects'

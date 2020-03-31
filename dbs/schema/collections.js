@@ -338,7 +338,7 @@ async function create_captions_collection(){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["post_id", "creator_id", "timestamp", "last_modified", "status"],
+                required:["post_id", "creator_id", "timestamp", "last_modified", "status", "description"],
                 properties:{
                     post_id:{
                         bsonType:"objectId",
@@ -372,6 +372,49 @@ async function create_captions_collection(){
 
 }
 
+
+//up_vote
+async function create_votes_collection(){
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.votes, {
+        validator:{
+            $jsonSchema:{
+                bsonType:"object",
+                required:["content_id", "creator_id", "timestamp", "last_modified", "status", "vote_type"],
+                properties:{
+                    content_id:{
+                        bsonType:"objectId",
+                        description:"content_id must be a objectId and is required"
+                    },
+                    creator_id:{
+                        bsonType:"objectId",
+                        description:"creator_id must be a objectId and is required"
+                    },
+                    timestamp:{
+                        bsonType:"date",
+                        description:"timestamp must be date(ISODate) and is required"
+                    },
+                    last_modified:{
+                        bsonType:"date",
+                        description:"last_modified must be date(ISODate) and is required"
+                    },
+                    status:{
+                        enum:["ACTIVE", "NOT_ACTIVE"],
+                        description:"status must be ACTIVE or NOT_ACTIVE and is required"
+                    },
+                    vote_type:{
+                        enum:["UP", "DOWN"],
+                        description:"vote must be UP or DOWN and is required"
+                    },
+                    content_type:{
+                        enum:["CAPTION"],
+                        description:"vote must be CAPTION and is required"
+                    }
+                }
+            }
+        }  
+    })
+}
+
 module.exports={
     create_user_collection:create_user_collection,
     create_user_account_collection:create_user_account_collection,
@@ -381,5 +424,6 @@ module.exports={
     create_comments_collection:create_comments_collection,
     create_room_post_collection:create_room_post_collection,
     create_images_collection:create_images_collection,
-    create_captions_collection:create_captions_collection
+    create_captions_collection:create_captions_collection,
+    create_votes_collection:create_votes_collection
 }

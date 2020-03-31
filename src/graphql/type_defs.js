@@ -219,14 +219,16 @@ module.exports = gql`
     }
 
     type Caption {
+        _id:ID!,
         post_id:ID!,
         creator_info:User_account!,
         timestamp:String!,
-        likes_count:Int!, 
-        user_liked:Boolean!,
         last_modified:String!,
         status:String!,
-        description:String!
+        description:String!,     
+        up_votes_count:Int!, 
+        down_votes_count:Int!  
+        user_vote_object:Vote
     }
 
     type Room_post_cursor {
@@ -286,6 +288,25 @@ module.exports = gql`
         file_mime:String!,
     }
 
+    #Mutation toggle_vote_input
+    input toggle_vote_input{
+        content_id:ID!, 
+        vote_type:String!, 
+        content_type:String!
+    }
+
+    # vote type
+    type Vote {
+        _id:ID!,
+        content_id:ID!,
+        creator_id:ID!, 
+        vote_type:String!,
+        status:String!,
+        timestamp:String!, 
+        last_modified:String!,
+        content_type:String!
+    }
+
     type Mutation {
 
         #user
@@ -318,6 +339,8 @@ module.exports = gql`
         #caption
         create_caption(user_input:create_caption):Caption!
 
+        #votes
+        toggle_vote(user_input:toggle_vote_input):Vote!
 
     }
 
@@ -345,6 +368,9 @@ module.exports = gql`
         #user
         get_user_info:User_account!
         get_other_user_info(other_user_id:ID!):User_account!
+
+        #captions
+        get_post_captions(post_id:ID!):[Caption!]!
 
     }   
 
