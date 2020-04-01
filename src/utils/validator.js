@@ -264,25 +264,10 @@ function get_user_profile_posts_validation(object){
 
 
 // likes queries/mutations
+function toggle_like_validation(object){
 
-function create_like_validation(object){
-
-    errors = {}
-
-    if(object.user_id.trim() === ""){
-        errors.user_id = "user_id must not be empty"
-    }else if (!is_valid_objectid(object.user_id)){
-        errors.user_id = "user_id is not valid ObjectID"
-    }
-
-    if(object.like_type.trim() === ""){
-        errors.like_type = "like_type must not be empty"
-    }else{
-
-        if (!(["ROOM_POST", "COMMENT"].includes(object.like_type.trim()))){
-            errors.like_type = `like type must be from ["ROOM_POST", "COMMENT"]`
-        }
-    }
+    errors={}
+    
     
     if (object.content_id.trim() === ""){
         errors.content_id = "content_id must not be empty"
@@ -294,12 +279,6 @@ function create_like_validation(object){
         errors, 
         valid: Object.keys(errors).length<1
     }
-}
-
-function unlike_content_validation(object){
-
-    return create_like_validation(object)
-
 }
 
 //end
@@ -429,8 +408,7 @@ module.exports = {
     get_user_profile_posts_validation,
 
     //likes queries/mutations
-    create_like_validation, 
-    unlike_content_validation,
+    toggle_like_validation,
 
     //comments queries/mutations
     create_comment_validation, 

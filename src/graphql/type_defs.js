@@ -137,15 +137,13 @@ module.exports = gql`
         timestamp:String!,
         last_modified:String!,
         status:String!,
-        like_type:String!,
         content_id:ID!
     }
 
     # Mutation create_like/unlike
-    input create_like_input {
-        user_id:ID!,
-        like_type:String!,
-        content_id:ID!
+    input toggle_like_input {
+        content_id:ID!,
+        status:String!
     }
 
     type Comment {
@@ -323,8 +321,7 @@ module.exports = gql`
         unfollow_room(user_input:follow_room_input):Follow_room!,
 
         #likes
-        create_like(user_input:create_like_input):Like!,
-        unlike_content(user_input:create_like_input):Like!,
+        toggle_like(user_input:toggle_like_input):Like!
 
         #comments
         create_comment(user_input:create_comment_input):Comment!,

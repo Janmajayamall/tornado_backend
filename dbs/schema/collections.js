@@ -216,7 +216,7 @@ async function create_likes_collection(main_db){
         validator:{
             $jsonSchema:{
                 bsonType:"object",
-                required:["user_id", "timestamp", "status", "last_modified", "like_type", "content_id"],
+                required:["user_id", "timestamp", "status", "last_modified", "content_id"],
                 properties:{
                     user_id:{
                         bsonType:"objectId",
@@ -233,10 +233,6 @@ async function create_likes_collection(main_db){
                     status:{
                         enum:["ACTIVE", "NOT_ACTIVE"],
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
-                    },
-                    like_type:{
-                        enum:["ROOM_POST", "COMMENT", "ROOM_POST_CAPTION"],
-                        description:"like_type must be POST or COMMENT and is required"
                     },
                     content_id:{
                         bsonType:"objectId",

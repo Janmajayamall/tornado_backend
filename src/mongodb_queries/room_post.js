@@ -147,7 +147,6 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                             $expr:{
                                 $and:[
                                     {$eq:["$content_id", "$$post_id"]},
-                                    {$eq:["$like_type", "ROOM_POST"]},
                                     {$eq:["$status", "ACTIVE"]}
                                 ],
                             }
@@ -159,13 +158,12 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
             }},
             {$lookup: {
                 from:db_structure.main_db.collections.likes,
-                let:{post_id:"$_id"},
+                let:{post_id:"$_id", post_t:"$post_type"},
                 pipeline:[
                     {$match:{
                             $expr:{
                                 $and:[
                                     {$eq:["$content_id", "$$post_id"]},
-                                    {$eq:["$like_type", "ROOM_POST"]},
                                     {$eq:["$status", "ACTIVE"]},
                                     {$eq:["$user_id", ObjectID(user_id)]}
                                 ],
@@ -255,7 +253,7 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                                 {$eq:["$status", "ACTIVE"]}
                             ]}
                     }},
-                    {$limit:3},
+                    {$limit:2},
                     //lookup for creator info for each caption object
                     {$lookup:{
                         from:db_structure.main_db.collections.user_accounts,
@@ -504,7 +502,6 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                             $expr:{
                                 $and:[
                                     {$eq:["$content_id", "$$post_id"]},
-                                    {$eq:["$like_type", "ROOM_POST"]},
                                     {$eq:["$status", "ACTIVE"]}
                                 ],
                             }
@@ -522,7 +519,6 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                             $expr:{
                                 $and:[
                                     {$eq:["$content_id", "$$post_id"]},
-                                    {$eq:["$like_type", "ROOM_POST"]},
                                     {$eq:["$status", "ACTIVE"]},
                                     {$eq:["$user_id", ObjectID(user_id)]}
                                 ],
@@ -655,7 +651,6 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                                     $expr:{
                                         $and:[
                                             {$eq:["$content_id", "$$caption_id"]},
-                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
                                             {$eq:["$status", "ACTIVE"]}
                                         ],
                                     }
@@ -674,7 +669,6 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                                     $expr:{
                                         $and:[
                                             {$eq:["$content_id", "$$caption_id"]},
-                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
                                             {$eq:["$status", "ACTIVE"]},
                                             {$eq:["$user_id", ObjectID(user_id)]}
                                         ],
@@ -842,7 +836,6 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                             $expr:{
                                 $and:[
                                     {$eq:["$content_id", "$$post_id"]},
-                                    {$eq:["$like_type", "ROOM_POST"]},
                                     {$eq:["$status", "ACTIVE"]}
                                 ],
                             }
@@ -860,7 +853,6 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                             $expr:{
                                 $and:[
                                     {$eq:["$content_id", "$$post_id"]},
-                                    {$eq:["$like_type", "ROOM_POST"]},
                                     {$eq:["$status", "ACTIVE"]},
                                     {$eq:["$user_id", ObjectID(user_id)]}
                                 ],
@@ -993,7 +985,6 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                                     $expr:{
                                         $and:[
                                             {$eq:["$content_id", "$$caption_id"]},
-                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
                                             {$eq:["$status", "ACTIVE"]}
                                         ],
                                     }
@@ -1012,7 +1003,6 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                                     $expr:{
                                         $and:[
                                             {$eq:["$content_id", "$$caption_id"]},
-                                            {$eq:["$like_type", "ROOM_CAPTION_POST"]},
                                             {$eq:["$status", "ACTIVE"]},
                                             {$eq:["$user_id", ObjectID(user_id)]}
                                         ],
