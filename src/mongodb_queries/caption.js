@@ -19,8 +19,8 @@ async function create_caption(db_structure, user_id,caption_object){
     caption_res = get_insert_one_result(caption_res)
 
     //setting up likes count & user_liked
-    caption_res.likes_count=0
-    caption_res.user_liked=false
+    caption_res.up_votes_count=0
+    caption_res.down_votes_count=0
 
     //creator_info
     const creator_info = await get_user_info(db_structure, user_id)

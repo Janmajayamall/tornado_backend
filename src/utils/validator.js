@@ -162,8 +162,8 @@ function create_room_post_validation(object){
 
     if(object.post_type.trim() === ""){
         errors.post_type = "post_type must not be empty"
-    }else if(!(["ROOM_POST"].includes(object.post_type.trim()))){
-        errors.post_type = `post_type must be any value from ["ROOM_POST"]`
+    }else if(!(["ROOM_POST", "ROOM_CAPTION_POST"].includes(object.post_type.trim()))){
+        errors.post_type = `post_type must be any value from ["ROOM_POST", "ROOM_CAPTION_POST"]`
     }
 
     if(object.image){

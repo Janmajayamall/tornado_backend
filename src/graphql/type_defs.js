@@ -247,7 +247,7 @@ module.exports = gql`
     }
 
     #Mutation create_caption_input 
-    input create_caption {
+    input create_caption_input {
         post_id:ID!, 
         description:String!
     }
@@ -334,7 +334,7 @@ module.exports = gql`
         deactivate_room_post(_id:ID!):Room_post!
 
         #caption
-        create_caption(user_input:create_caption):Caption!
+        create_caption(user_input:create_caption_input):Caption!
 
         #votes
         toggle_vote(user_input:toggle_vote_input):Vote!

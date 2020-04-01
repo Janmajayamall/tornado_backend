@@ -198,7 +198,7 @@ async function create_room_post_collection(main_db){
                         description:"status must be ACTIVE or NOT_ACTIVE and is required"
                     },
                     post_type:{
-                        enum:["ROOM_POST", "ROOM_POST_CAPTION"],
+                        enum:["ROOM_POST", "ROOM_CAPTION_POST"],
                         description:"post_type must be ROOM_POST and is required"
                     }
 
