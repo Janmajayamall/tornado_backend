@@ -8,7 +8,7 @@ module.exports = {
     Mutation:{
 
         async toggle_like(parent, args, context){
-
+            console.log(args.user_input, "start")
             //authenticating the user
            const user_id = await verify_jwt(context.req_headers.authorization)
 
@@ -21,7 +21,8 @@ module.exports = {
             validator_wrapper(toggle_like_validation(like_object))
             
             const result = await mongodb_like_queries.toggle_like(context.db_structure, user_id, like_object)
-            console.log(result)
+            
+            
             return result
             
         }

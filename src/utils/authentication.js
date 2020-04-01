@@ -52,7 +52,7 @@ async function issue_jwt(user){
 }
 
 async function verify_jwt(jwt){
-
+    console.log(jwt, "not here")
     const token = jwt.split(" ")[1].trim()
 
     if (!token){

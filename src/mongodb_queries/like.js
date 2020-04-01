@@ -4,13 +4,13 @@ const {ObjectID} = require("mongodb")
 
 
 async function toggle_like(db_structure, user_id, like_object){
-
+    console.log(like_object)
     let like_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.likes).findOne(
         {
             user_id:ObjectID(user_id),
             content_id:ObjectID(like_object.content_id),
         })
-    
+    console.log(like_object, like_check)
     // if like object with same user_id, content_id
     if (like_check){
 
