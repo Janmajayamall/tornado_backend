@@ -1,8 +1,7 @@
 const mongodb_room_queries = require("./../../mongodb_queries/room")
 const {validator_wrapper, 
         create_room_validation, 
-        follow_room_validation, 
-        unfollow_room_validation,
+        toggle_follow_room_validation,
         objectid_validation,    
         } = require("./../../utils/validator")
 const {db_instance_validation,} = require("./../../utils/general_checks")
@@ -44,37 +43,20 @@ module.exports = {
             return result
         },
 
-        async follow_room(parent, args, context){
+        async toggle_follow_room(parent, args, context){
 
             //authenticating the user
-            await verify_jwt(context.req_headers.authorization)
+            const user_id = await verify_jwt(context.req_headers.authorization)
 
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
-            const follow_room_object = args.user_input
+            const toggle_follow_room_object = args.user_input
             //validating the input
-            validator_wrapper(follow_room_validation(follow_room_object))
+            validator_wrapper(toggle_follow_room_validation(toggle_follow_room_object))
 
             //following the room
-            const result = mongodb_room_queries.follow_room(context.db_structure, follow_room_object)
-            return result
-        },
-
-        async unfollow_room(parent, args, context){
-
-            //authenticating the user
-            await verify_jwt(context.req_headers.authorization)
-
-            //checking for db instance in the context
-            db_instance_validation(context.db_structure.main_db)
-
-            const unfollow_room_object = args.user_input
-            //validating the input 
-            validator_wrapper(unfollow_room_validation(unfollow_room_object))
-
-            //following the room
-            const result = await mongodb_room_queries.unfollow_room(context.db_structure, unfollow_room_object)
+            const result = mongodb_room_queries.toggle_follow_room(context.db_structure, user_id, toggle_follow_room_object)
             return result
         },
 
@@ -112,16 +94,16 @@ module.exports = {
     },
 
     Queries:{
-        async get_all_rooms(parent, args, context){
+        async get_rooms(parent, args, context){
 
             //authenticating the user
             const user_id = await verify_jwt(context.req_headers.authorization)
-            console.log(user_id)
+            
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
             //getting all the rooms
-            const result = await mongodb_room_queries.get_all_rooms(context.db_structure, user_id)
+            const result = await mongodb_room_queries.get_rooms(context.db_structure, user_id, args.user_input)
             return result
         
         },
@@ -150,7 +132,6 @@ module.exports = {
 
             //extracting user_id from args
             let user_id = args.user_id
-            console.log(user_id, "here")
             //populating user _id
             if(!user_id){
                 user_id = current_user_id

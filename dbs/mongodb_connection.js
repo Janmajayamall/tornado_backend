@@ -22,6 +22,7 @@ async function connect_all_db(){
     
     try{
         let database_list = await Promise.all([connect(DEV_URI)])
+
         return{
             main_connection:database_list[0]
         }

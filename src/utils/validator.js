@@ -103,7 +103,7 @@ function create_room_validation(object){
 
 }
 
-function follow_room_validation(object){
+function toggle_follow_room_validation(object){
 
     const errors = {}
 
@@ -113,12 +113,11 @@ function follow_room_validation(object){
         errors.room_id = "room_id is not a valid ObjectID"
     }
 
-    if(object.follower_id.trim() === ""){
-        errors.follower_id="follower_id must not be empty"
-    }else if(!is_valid_objectid(object.follower_id)){
-        errors.follower_id = "follower_id is not a valid ObjectID"
+    if(object.status==""){
+        errors.status="status must not empty. Should be either ACTIVE or NOT_ACTIVE"
+    }else if(!(["ACTIVE", "NOT_ACTIVE"].includes(object.status.trim()))){
+        errors.status="status should be either ACTIVE or NOT_ACTIVE"
     }
-
 
     return {
         errors, 
@@ -127,11 +126,6 @@ function follow_room_validation(object){
 
 }
 
-function unfollow_room_validation(object){
-
-    return follow_room_validation(object)
-
-}
 
 //end
 
@@ -398,8 +392,7 @@ module.exports = {
 
     //room queries/mutations
     create_room_validation,
-    follow_room_validation,
-    unfollow_room_validation,
+    toggle_follow_room_validation,
 
     //room_posts queries/mutations
     create_room_post_validation,

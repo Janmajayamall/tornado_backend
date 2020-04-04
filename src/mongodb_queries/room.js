@@ -80,67 +80,48 @@ async function reactivate_room(db_structure, room_id){
 
 }
 
-async function follow_room(db_structure, follow_object){
+async function toggle_follow_room(db_structure, user_id, toggle_follow_object){
 
-    //TODO: check whether room id active or not
+    //check whether user has a entry or not
+    let follow_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).findOne(
+        {
+            room_id:ObjectID(toggle_follow_object.room_id), 
+            follower_id:ObjectID(user_id)
+        })
 
-    //checking whether follow object already exists or not
-    let follow_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).findOne({room_id:ObjectID(follow_object.room_id), follower_id:ObjectID(follow_object.follower_id)})
+    // if the follow_object exists
     if (follow_check){
 
-        //checking whether the follow status is active or not
-        if (follow_check.status==="NOT_ACTIVE"){
-
-            //change status to ACTIVE again
-            let follow_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).findOneAndUpdate({
-                                                                                                                                _id:follow_check._id    
-                                                                                                                            }, {
-                                                                                                                                $set:{
-                                                                                                                                    status:"ACTIVE",
-                                                                                                                                    last_modified:new Date()
-                                                                                                                                }
-                                                                                                                            }, { returnOriginal:false})
-            
-            follow_res = follow_res.value
-                                                                                                                            
-            return follow_res                                                                                                                            
-
-        }else{
-
+        //checking whether the status is already equal to toggle_follow_object.status, if yes then simply return follow check object
+        if (follow_check.status===toggle_follow_object.status){
             return follow_check
         }
+
+        //change the status of the follow_object to toggle_follow_object.status
+        let follow_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).findOneAndUpdate({
+            _id:follow_check._id    
+        }, {
+            $set:{
+                status:toggle_follow_object.status,
+                last_modified:new Date()
+            }
+        }, { returnOriginal:false})
+
+        follow_res = follow_res.value
+        return follow_res
     }
     
-    //following the room
+    //follow object does not exists, follow the room
     let follow_value = {
-        ...follow_object,
-        room_id:ObjectID(follow_object.room_id),
-        follower_id:ObjectID(follow_object.follower_id),
+        ...toggle_follow_object,
+        room_id:ObjectID(toggle_follow_object.room_id),
+        follower_id:ObjectID(user_id),
         timestamp:new Date(),
         last_modified:new Date(),
-        status:"ACTIVE"
     }
     let follow_result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).insertOne(follow_value)
     follow_result = get_insert_one_result(follow_result)
     return follow_result
-}
-
-async function unfollow_room(db_structure, follow_object){
-
-    //updating the follow_room status to ACTIVE
-    let room_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).findOneAndUpdate({
-                                                                                                                        room_id:ObjectID(follow_object.room_id),
-                                                                                                                        follower_id:ObjectID(follow_object.follower_id)    
-                                                                                                                    }, {
-                                                                                                                        $set:{
-                                                                                                                            status:"NOT_ACTIVE",
-                                                                                                                            last_modified:new Date()
-                                                                                                                        }
-                                                                                                                    }, { returnOriginal:false})
-  
-    room_res = room_res.value
-                                                                                                                    
-    return room_res
 }
 
 //this should only be used when you are sure that no rooms in bulk_follow_object already being followed by user
@@ -174,12 +155,21 @@ async function find_followed_rooms(db_structure, user_id){
     return room_objects
 }
 
-async function get_all_rooms(db_structure, user_id){
+async function get_rooms(db_structure, user_id, filter_object){
 
+    //extracting name_filter
+    let name_filter = ""
+    if(filter_object && filter_object.name_filter){
+        name_filter=filter_object.name_filter
+    }
+    console.log(name_filter.length, "aaa thiss")
     //getting the rooms with populated bool value of whether user follows the room or not
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
         [
-            {$match: {status:"ACTIVE"}},
+            // if the name filter is not undefined then run the text query, otherwise return all rooms
+            name_filter.length!==0?
+                {$match: {status:"ACTIVE", $text:{$search:name_filter}}}:
+                {$match: {status:"ACTIVE"}},
             {$lookup:{
                 from:db_structure.main_db.collections.room_follows,
                 let:{room_identification:"$_id"},
@@ -856,13 +846,12 @@ module.exports = {
     create_room,
     deactivate_room,
     reactivate_room,
-    follow_room,
-    unfollow_room,
+    toggle_follow_room,
     bulk_follow_rooms,
 
     //queries
     find_followed_rooms,
-    get_all_rooms,
+    get_rooms,
     get_not_joined_rooms,
     get_all_joined_rooms,
     get_all_created_rooms,

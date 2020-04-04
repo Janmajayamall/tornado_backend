@@ -126,9 +126,15 @@ module.exports = gql`
     }
 
     # Mutation follow_room input/unfollow
-    input follow_room_input {
+    input bulk_follow_room_input {
         room_id:ID!,
         follower_id:ID!,
+    }
+
+    # Mutation toggle_follow_room_input 
+    input toggle_follow_room_input {
+        room_id:ID!,
+        status:String!
     }
 
     type Like {
@@ -305,6 +311,11 @@ module.exports = gql`
         content_type:String!
     }
 
+    #Query get_rooms_input
+    input get_rooms_input {
+        name_filter:String
+    }
+
     type Mutation {
 
         #user
@@ -315,10 +326,9 @@ module.exports = gql`
         #rooms
         create_room(user_input:room_input):Room_demographic!,
         deactivate_room(_id:ID!):Room!, 
-        follow_room(user_input:follow_room_input):Follow_room!,
-        bulk_follow_rooms(user_input:[follow_room_input!]!):[Follow_room!]!
+        toggle_follow_room(user_input:toggle_follow_room_input):Follow_room!,
+        bulk_follow_rooms(user_input:[bulk_follow_room_input!]!):[Follow_room!]!
         reactivate_room(_id:ID!):Room!,
-        unfollow_room(user_input:follow_room_input):Follow_room!,
 
         #likes
         toggle_like(user_input:toggle_like_input):Like!
@@ -352,7 +362,7 @@ module.exports = gql`
         get_post_comments(user_input:get_post_comments_input):[Comment_with_creator!]!
 
         #rooms
-        get_all_rooms:[Room_demographic!]!
+        get_rooms(user_input:get_rooms_input):[Room_demographic!]!
         get_not_joined_rooms:[Room_demographic!]!
         get_all_joined_rooms(user_id:ID):[Room_demographic!]!
         get_all_created_rooms(user_id:ID):[Room_demographic!]!
