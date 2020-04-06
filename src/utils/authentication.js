@@ -47,12 +47,11 @@ async function issue_jwt(user){
 
     const signed_jwt = jsonwebtoken.sign(payload, PRIV_KEY, {expiresIn: expires_in, algorithm: "RS256"})
 
-    console.log(`Bearer ${signed_jwt}`)
     return `Bearer ${signed_jwt}`
 }
 
 async function verify_jwt(jwt){
-    console.log(jwt, "not here")
+
     const token = jwt.split(" ")[1].trim()
 
     if (!token){

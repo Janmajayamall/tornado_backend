@@ -141,10 +141,10 @@ async function edit_user_profile(db_structure, user_id, edit_user_profile){
             //getting file object
             let last_image_object = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.images).findOneAndDelete({"_id":ObjectID(edit_user_profile.last_avatar_id)})
             last_image_object=last_image_object.value //getting the document
-            console.log(last_image_object, "last_image_object")
+
             //deleting the image from s3
             const result_delete_image_s3 = await delete_image_file(last_image_object.image_name)
-            console.log(result_delete_image_s3, "avatar file deleted")
+
         }
 
         //create a new image object and then move forward
@@ -162,7 +162,7 @@ async function edit_user_profile(db_structure, user_id, edit_user_profile){
         //populate final_edited_user_profile default_avatar to false
         final_edited_user_profile.default_avatar=false
     }
-    console.log(final_edited_user_profile)
+
     const data = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).findOneAndUpdate({
                                                                                                                         "user_id":ObjectID(user_id)    
                                                                                                                         },{
@@ -227,7 +227,7 @@ async function get_user_info(db_structure, user_id){
         if (user_info.length===0){
             throw new AuthenticationError("No such user exits")        
         }
-        console.log(user_info)
+
         return user_info[0]
 
         

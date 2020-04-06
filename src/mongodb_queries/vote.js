@@ -10,7 +10,7 @@ async function toggle_vote(db_structure, user_id, vote_object){
         content_id:ObjectID(vote_object.content_id),
         content_type:vote_object.content_type
     })
-    console.log(vote_check)
+
     if(vote_check){ //vote already exists; toggle it
         
         let vote_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.votes).findOneAndUpdate(

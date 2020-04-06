@@ -46,17 +46,14 @@ async function create_room_post(db_structure, room_post_object){
     //populating likes_count & user_liked
     room_post_res.likes_count=0
     room_post_res.user_liked=false
-    console.log(room_post_res.room_ids, "room_ids")
+
     //getting room_objects
     const room_objects = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).find({_id:{$in:room_post_res.room_ids}}).toArray()
     room_post_res.room_objects=room_objects
-    console.log(room_objects, "room_ids")
 
     //creator_info
     const creator_info = await get_user_info(db_structure, room_post_res.creator_id)
     room_post_res.creator_info=creator_info
-
-    console.log("this. is. true.", room_post_res)
 
     return room_post_res 
 }
@@ -440,7 +437,6 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
         ]
     ).toArray() 
     //more posts left after this
-    console.log(room_posts_list, "dadadad")
     let has_more = false
 
     //length of rooms_post_list
@@ -1133,8 +1129,6 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
         room_post_cursor:new_cursor
 
     }
-
-    console.log(result)
 
     return result
 

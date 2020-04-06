@@ -8,7 +8,7 @@ module.exports = {
     Mutation:{
 
         async create_comment(parent, args, context){
-            console.log(args.user_input)
+
             //verifying jwt
             await verify_jwt(context.req_headers.authorization)
 

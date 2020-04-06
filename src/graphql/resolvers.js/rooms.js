@@ -77,7 +77,7 @@ module.exports = {
         },
 
         async bulk_follow_rooms(parent, args, context){
-            console.log(args.user_input)
+
             //authenticating the user
             await verify_jwt(context.req_headers.authorization)
 
@@ -112,7 +112,7 @@ module.exports = {
 
             //authenticating the user
             const user_id = await verify_jwt(context.req_headers.authorization)
-            // console.log(user_id)
+
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
@@ -175,7 +175,6 @@ module.exports = {
             let user_ids = args.user_ids
             //pushing current user_id
             user_ids.push(user_id)
-            console.log("arrr", user_ids)
 
             //getting all the rooms
             const result = await mongodb_room_queries.get_common_rooms(context.db_structure, user_ids)

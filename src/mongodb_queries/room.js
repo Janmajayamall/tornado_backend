@@ -151,7 +151,7 @@ async function bulk_follow_rooms(db_structure, bulk_follow_room_object){
 
 //this is just an helper function for get_room_posts_user_id
 async function find_followed_rooms(db_structure, user_id){
-    const room_objects = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).find({follower_id:ObjectID(user_id)}).toArray()
+    const room_objects = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).find({follower_id:ObjectID(user_id), status:"ACTIVE"}).toArray()
     return room_objects
 }
 
@@ -162,7 +162,7 @@ async function get_rooms(db_structure, user_id, filter_object){
     if(filter_object && filter_object.name_filter){
         name_filter=filter_object.name_filter
     }
-    console.log(name_filter.length, "aaa thiss")
+
     //getting the rooms with populated bool value of whether user follows the room or not
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
         [
@@ -630,7 +630,7 @@ async function get_common_rooms(db_structure, user_id_arr){
     user_id_arr.forEach(user_id => {
         user_id_arr_objectid.push(ObjectID(user_id))
     });
-    console.log(user_id_arr_objectid)
+
     //getting all room_follows object matching any user_id in the user_id_arr
     const common_room_ids_obj = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).aggregate(
         [
@@ -645,11 +645,10 @@ async function get_common_rooms(db_structure, user_id_arr){
         ]
     ).toArray()
     let common_room_ids = []
-    console.log(common_room_ids_obj, 'aw')
+
     common_room_ids_obj.forEach(room_obj=>{
         common_room_ids.push(room_obj._id)
     })
-    console.log("common room ids ",common_room_ids )
 
     //getting the rooms with populated bool value of whether user follows the room or not
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(

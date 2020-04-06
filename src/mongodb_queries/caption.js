@@ -30,7 +30,7 @@ async function create_caption(db_structure, user_id,caption_object){
 }
 
 async function get_post_captions(db_structure, user_id, post_id){
-    console.log(user_id, post_id)
+
     const captions = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.captions).aggregate(
         [
             {$match:{post_id:ObjectID(post_id), status:"ACTIVE"}},

@@ -58,7 +58,6 @@ async function deactivate_comment(db_structure, comment_id){
 
 async function get_post_comments(db_structure, comment_query_object){
 
-    console.log(comment_query_object)
 
     const comments_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.comments).aggregate([
         {$match: {status:"ACTIVE", content_id:ObjectID(comment_query_object.content_id), content_type:comment_query_object.content_type}},
@@ -110,8 +109,6 @@ async function get_post_comments(db_structure, comment_query_object){
             creator_info_dev:0
         }}
     ]).toArray()
-
-    console.log(comments_list)
 
     return comments_list
 
