@@ -39,6 +39,7 @@ async function create_room(db_structure, room_object){
 
     room_res.room_members_count=1
     room_res.user_follows=true
+    room_res.is_user=true
 
     return room_res
 
@@ -270,6 +271,13 @@ async function get_rooms(db_structure, user_id, filter_object){
                         else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
                     }
                 },
+                is_user:{
+                    $cond:{
+                        if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                        then:true, 
+                        else:false
+                    }
+                }
             }},
             {$project:{
                 room_members_count_dev:0,
@@ -283,7 +291,7 @@ async function get_rooms(db_structure, user_id, filter_object){
 }
 
 async function get_not_joined_rooms(db_structure, user_id){
-
+    console.log(user_id, "as")
     // const result = await helper_get_followed_rooms(db_structure, user_id)
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate([
 
@@ -392,6 +400,13 @@ async function get_not_joined_rooms(db_structure, user_id){
                     else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
                 }
             },
+            is_user:{
+                $cond:{
+                    if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                    then:true, 
+                    else:false
+                }
+            }
         }},
         {$project:{
             user_join:0,
@@ -504,6 +519,13 @@ async function get_all_joined_rooms(db_structure, user_id){
                         else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
                     }
                 },
+                is_user:{
+                    $cond:{
+                        if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                        then:true, 
+                        else:false
+                    }
+                }
             }},
             {$project:{
                 user_follow_room_dev:0,
@@ -611,6 +633,13 @@ async function get_all_created_rooms(db_structure, creator_user_id, current_user
                         then:false,
                         else:true
                     } 
+                },
+                is_user:{
+                    $cond:{
+                        if:{$eq:[ObjectID(current_user_id), "$creator_id"]},
+                        then:true,
+                        else:false                        
+                    }
                 }
             }},
             {$project:{
@@ -623,7 +652,7 @@ async function get_all_created_rooms(db_structure, creator_user_id, current_user
     return rooms
 }
 
-async function get_common_rooms(db_structure, user_id_arr){
+async function get_common_rooms(db_structure, user_id, user_id_arr){
 
     //convert all id strings into objectIds
     const user_id_arr_objectid = []
@@ -720,6 +749,13 @@ async function get_common_rooms(db_structure, user_id_arr){
                         if: {$eq:[{$size:"$creator_info_dev"}, 0]},
                         then:null,
                         else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
+                    }
+                },
+                is_user:{
+                    $cond:{
+                        if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                        then:true, 
+                        else:false
                     }
                 }
             }},
@@ -827,6 +863,13 @@ async function get_room_demographics(db_structure, room_id, user_id){
                     then:false,
                     else:true
                 } 
+            },
+            is_user:{
+                $cond:{
+                    if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                    then:true, 
+                    else:false
+                }
             }
         }},
         {$project:{

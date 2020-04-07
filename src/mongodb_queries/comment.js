@@ -38,25 +38,22 @@ async function edit_comment(db_structure,comment_id, edit_comment_object){
 
 }
 
-async function deactivate_comment(db_structure, comment_id){
+async function delete_comment(db_structure, user_id, comment_id){
 
     //deactivating the comment
-    let comment_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.comments).findOneAndUpdate({
-                                                                                                                                    "_id":ObjectID(comment_id)    
-                                                                                                                                    },{
-                                                                                                                                        $set:{
-                                                                                                                                            status:"NOT_ACTIVE",
-                                                                                                                                            last_modified:new Date()
-                                                                                                                                        }
-                                                                                                                                    }, {returnOriginal:false})
-
-    comment_res = comment_res.value
-    return comment_res                                                                                                                                    
+    let result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.comments).findOneAndDelete(
+        {
+            _id:ObjectID(comment_id),
+            user_id:ObjectID(user_id)
+        }
+    )
+    result = result.value
+    return result._id                                                                                                                             
 }
 
 //queries
 
-async function get_post_comments(db_structure, comment_query_object){
+async function get_post_comments(db_structure, user_id, comment_query_object){
 
 
     const comments_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.comments).aggregate([
@@ -104,6 +101,13 @@ async function get_post_comments(db_structure, comment_query_object){
                     else:{$arrayElemAt: [ "$creator_info_dev", 0 ] }
                 }
             },
+            is_user:{
+                $cond:{
+                    if: {$eq:[ObjectID(user_id), "$user_id"]},
+                    then:true,
+                    else:false
+                }
+            },
         }},
         {$project:{
             creator_info_dev:0
@@ -118,7 +122,7 @@ module.exports = {
 
     create_comment,
     edit_comment,
-    deactivate_comment,
+    delete_comment,
 
     //queries
     get_post_comments

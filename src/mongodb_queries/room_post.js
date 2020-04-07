@@ -55,6 +55,9 @@ async function create_room_post(db_structure, room_post_object){
     const creator_info = await get_user_info(db_structure, room_post_res.creator_id)
     room_post_res.creator_info=creator_info
 
+    //is_user the creator = true
+    room_post_res.is_user=true
+
     return room_post_res 
 }
 
@@ -375,6 +378,13 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                                 then:null,
                                 else:{$arrayElemAt: [ "$user_vote_object_dev", 0 ] }
                             }
+                        },
+                        is_user:{
+                            $cond:{
+                                if: {eq:[ObjectID(user_id), "$creator_id"]},
+                                then:true,
+                                else:false
+                            }
                         }
                     }},                    
                     //sorting caption object with likes_count:1 timestamp:-1
@@ -427,6 +437,13 @@ async function get_room_posts_user_id(db_structure, user_id, get_room_post_objec
                             if: {$eq:[{$size:"$image_dev"}, 0]},
                             then:null,
                             else:{$arrayElemAt: ["$image_dev", 0]}
+                        }
+                    },
+                    is_user:{
+                        $cond:{
+                            if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                            then:true,
+                            else:false
                         }
                     },
                     post_type:1,
@@ -756,6 +773,13 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
                             if: {$eq:[{$size:"$image_dev"}, 0]},
                             then:null,
                             else:{$arrayElemAt: ["$image_dev", 0]}
+                        }
+                    },
+                    is_user:{
+                        $cond:{
+                            if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                            then:true,
+                            else:false
                         }
                     },
                     post_type:1,
@@ -1090,6 +1114,13 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                             if: {$eq:[{$size:"$image_dev"}, 0]},
                             then:null,
                             else:{$arrayElemAt: ["$image_dev", 0]}
+                        }
+                    },
+                    is_user:{
+                        $cond:{
+                            if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                            then:true,
+                            else:false
                         }
                     },
                     post_type:1,

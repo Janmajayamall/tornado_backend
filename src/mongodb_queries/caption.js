@@ -24,10 +24,25 @@ async function create_caption(db_structure, user_id,caption_object){
 
     //creator_info
     const creator_info = await get_user_info(db_structure, user_id)
-    caption_res.creator_info=creator_info     
+    caption_res.creator_info=creator_info   
+    caption_object.is_user=true  
 
     return caption_res
 }
+
+async function delete_caption(db_structure, user_id, caption_id){
+
+    let result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.captions).findOneAndDelete(
+        {
+            _id:ObjectID(caption_id),
+            creator_id:ObjectID(user_id)
+        }
+    )
+
+    result=result.value   //retrieving copy of deleted document
+    return result._id
+}
+
 
 async function get_post_captions(db_structure, user_id, post_id){
 
@@ -158,6 +173,13 @@ async function get_post_captions(db_structure, user_id, post_id){
                         then:null,
                         else:{$arrayElemAt: [ "$user_vote_object_dev", 0 ] }
                     }
+                },
+                is_user:{
+                    $cond:{
+                        if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                        then:true,
+                        else:false
+                    }
                 }
             }}
         ]
@@ -174,6 +196,7 @@ module.exports = {
 
     //mutations
     create_caption,
+    delete_caption,
 
     //queries
     get_post_captions

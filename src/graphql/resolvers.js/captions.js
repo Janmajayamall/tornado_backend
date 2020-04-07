@@ -21,6 +21,23 @@ module.exports = {
             const result = await mongodb_caption_queries.create_caption(context.db_structure, user_id,caption_input)
             return result
         },
+
+        async delete_caption(parent, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //extracting caption_id
+            const caption_id = args.caption_id
+            //validating caption_id
+            validator_wrapper(objectid_validation(caption_id))
+
+            const result_id = await mongodb_caption_queries.delete_caption(context.db_structure, user_id, caption_id)
+            return result_id
+        }
     },
 
     Query:{

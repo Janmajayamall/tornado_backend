@@ -228,14 +228,40 @@ async function get_user_info(db_structure, user_id){
             throw new AuthenticationError("No such user exits")        
         }
 
-        return user_info[0]
+        return user_info[0]       
+}
 
-        
+async function check_email(db_structure, email){
+
+    const user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOne({email:email})
+
+    if(user){
+        return true
+    }else{
+        return false
+    }
+
+}
+
+async function check_username(db_structure, username){
+
+    const user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).findOne({username:username})
+
+    if(user){
+        return true
+    }else{
+        return false
+    }
+
 }
 
 module.exports = {
     register_user,
     login_user,
     get_user_info,
-    edit_user_profile
+    edit_user_profile,
+
+    //registration checks
+    check_email,
+    check_username
 }

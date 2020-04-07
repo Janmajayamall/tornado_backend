@@ -77,7 +77,7 @@ module.exports = {
         },
 
         async bulk_follow_rooms(parent, args, context){
-
+            console.log('dawdadadada')
             //authenticating the user
             await verify_jwt(context.req_headers.authorization)
 
@@ -86,8 +86,9 @@ module.exports = {
 
             const bulk_follow_room_object = args.user_input
             //TODO:validating the input
-            
+            console.log(bulk_follow_room_object,"athis")
             let result = await mongodb_room_queries.bulk_follow_rooms(context.db_structure, bulk_follow_room_object)
+            console.log(result, "aws")
             return result            
         }   
 
@@ -154,15 +155,15 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
            
             //extracting user_id from args
-            let user_id = args.user_id
+            let creator_user_id = args.user_id
             //populating user _id
             if(!user_id){
-                user_id = current_user_id
+                creator_user_id = current_user_id
             }
             validator_wrapper(objectid_validation(user_id))
             
             //getting all the rooms
-            const result = await mongodb_room_queries.get_all_created_rooms(context.db_structure, user_id)
+            const result = await mongodb_room_queries.get_all_created_rooms(context.db_structure, creator_user_id, current_user_id)
             return result
         },
 
@@ -177,7 +178,7 @@ module.exports = {
             user_ids.push(user_id)
 
             //getting all the rooms
-            const result = await mongodb_room_queries.get_common_rooms(context.db_structure, user_ids)
+            const result = await mongodb_room_queries.get_common_rooms(context.db_structure, user_id, user_ids)
             return result
         },
 

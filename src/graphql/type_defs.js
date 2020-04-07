@@ -106,7 +106,8 @@ module.exports = gql`
         creator_info:User_account!, 
         room_members_count:Int!,
         user_follows:Boolean!,
-        description:String!
+        description:String!,
+        is_user:Boolean!,
     }
 
     # Mutation room input type  TODO:You might want to change status to ENUM from String
@@ -173,6 +174,7 @@ module.exports = gql`
         comment_body:String!,
         content_type:String!,
         creator_info:User_account!
+        is_user:Boolean!
     }
 
     # Mutation create_comment/deactivate_comment
@@ -219,7 +221,8 @@ module.exports = gql`
         likes_count:Int!,
         user_liked:Boolean!,
         room_objects:[Room!]!,
-        caption_objects:[Caption!]
+        caption_objects:[Caption!],
+        is_user:Boolean!
     }
 
     type Caption {
@@ -232,7 +235,8 @@ module.exports = gql`
         description:String!,     
         up_votes_count:Int!, 
         down_votes_count:Int!  
-        user_vote_object:Vote
+        user_vote_object:Vote,
+        is_user:Boolean!
     }
 
     type Room_post_cursor {
@@ -335,7 +339,7 @@ module.exports = gql`
 
         #comments
         create_comment(user_input:create_comment_input):Comment!,
-        deactivate_comment(_id:ID!):Comment!,
+        delete_comment(comment_id:ID!):ID!,
         edit_comment(_id:ID!, user_input:edit_comment_input):Comment!
 
         #room_posts
@@ -345,6 +349,7 @@ module.exports = gql`
 
         #caption
         create_caption(user_input:create_caption_input):Caption!
+        delete_caption(caption_id:ID!):ID!
 
         #votes
         toggle_vote(user_input:toggle_vote_input):Vote!
@@ -375,6 +380,9 @@ module.exports = gql`
         #user
         get_user_info:User_account!
         get_other_user_info(other_user_id:ID!):User_account!
+        check_email(email:String!):Boolean!
+        check_username(username:String!):Boolean!
+
 
         #captions
         get_post_captions(post_id:ID!):[Caption!]!

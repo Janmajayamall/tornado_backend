@@ -14,13 +14,14 @@ module.exports = {
             const user_object = args.user_input
             //Validate the args
             validation_result = user_register_validation(user_object)
+            console.log(validation_result)
             if (!validation_result.valid){
                 throw new UserInputError("Error", {
                     errors: validation_result.errors
                 })
             }
             
-
+            console.log(user_object)
             result = await mongodb_user_queries.register_user(context.db_structure, user_object)
 
             return result 
@@ -91,6 +92,30 @@ module.exports = {
 
             const result = await mongodb_user_queries.get_user_info(context.db_structure, user_id)
             return result        
+        },
+
+        async check_email(parent, args, context){
+
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //extracting email id
+            const email = args.email
+
+            const result = await mongodb_user_queries.check_email(context.db_structure, email)
+            console.log(result)
+            return result
+        },
+
+        async check_username(parent, args, context){
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //extracting email id
+            const username = args.username
+
+            const result = await mongodb_user_queries.check_username(context.db_structure, username)
+            return result
         }
 
     }

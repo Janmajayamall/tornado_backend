@@ -43,21 +43,21 @@ module.exports = {
             return result
         },
 
-        async deactivate_comment(parent, args, context){
+        async delete_comment(parent, args, context){
 
             //verifying jwt
-            await verify_jwt(context.req_headers.authorization)
+            const user_id = await verify_jwt(context.req_headers.authorization)
 
             //checking for db instance int the context
             db_instance_validation(context.db_structure.main_db)
         
-            const _id = args._id
+            const comment_id = args.comment_id
             
             //validate the input id
-            validator_wrapper(objectid_validation(_id))
+            validator_wrapper(objectid_validation(comment_id))
             
 
-            const result = await mongodb_comments_queries.deactivate_comment(context.db_structure, _id)
+            const result = await mongodb_comments_queries.delete_comment(context.db_structure, user_id,comment_id)
             return result 
 
         }
@@ -77,7 +77,7 @@ module.exports = {
             //TODO: validate comment_query_object
 
             //getting the comment_object
-            const result = await mongodb_comments_queries.get_post_comments(context.db_structure, comment_query_object)
+            const result = await mongodb_comments_queries.get_post_comments(context.db_structure, user_id, comment_query_object)
             
             return result
 
