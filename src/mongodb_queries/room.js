@@ -16,7 +16,7 @@ async function create_room(db_structure, room_object){
 
             const reactivate_res = await reactivate_room(db_structure, room_check._id.toString())
             //making the person follow the room 
-            const follow_res = await follow_room(db_structure, {room_id:reactivate_res._id, follower_id:room_object.creator_id})
+            const follow_res = await toggle_follow_room(db_structure, room_object.creator_id, {room_id:reactivate_res._id, status:"ACTIVE"})
             return reactivate_res
 
         }else{
@@ -35,8 +35,8 @@ async function create_room(db_structure, room_object){
     
     let room_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).insertOne(room_value)
     room_res = get_insert_one_result(room_res)
-    const follow_res = await follow_room(db_structure, {room_id:room_res._id, follower_id:room_res.creator_id})
-
+    const follow_res = await toggle_follow_room(db_structure, room_object.creator_id, {room_id:room_res._id, status:"ACTIVE"})
+    console.log(follow_res, "after")
     room_res.room_members_count=1
     room_res.user_follows=true
     room_res.is_user=true

@@ -77,7 +77,6 @@ module.exports = {
         },
 
         async bulk_follow_rooms(parent, args, context){
-            console.log('dawdadadada')
             //authenticating the user
             await verify_jwt(context.req_headers.authorization)
 
