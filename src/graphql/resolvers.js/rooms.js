@@ -171,6 +171,9 @@ module.exports = {
             //authenticating the user
             const user_id = await verify_jwt(context.req_headers.authorization)
 
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
             //extract user_id arr & TODO: validate them 
             let user_ids = args.user_ids
             //pushing current user_id
@@ -186,12 +189,29 @@ module.exports = {
             //authenticating the user
             const user_id = await verify_jwt(context.req_headers.authorization)
 
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
             //extracting room_id 
             const room_id = args.room_id
             //validating room_id
             validator_wrapper(objectid_validation(room_id))
 
             const result = await mongodb_room_queries.get_room_demographics(context.db_structure, room_id, user_id )
+            return result
+        },
+
+        async check_room_name(parent, args, context){
+
+            //authenticating the user
+            await verify_jwt(context.req_headers.authorization)
+
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            const room_name = args.room_name
+
+            const result = await mongodb_room_queries.check_room_name(context.db_structure, room_name)
             return result
         }
 

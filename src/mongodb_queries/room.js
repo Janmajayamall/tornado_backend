@@ -882,6 +882,17 @@ async function get_room_demographics(db_structure, room_id, user_id){
     return rooms[0]
 }
 
+async function check_room_name(db_structure, room_name){
+
+    const room = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).findOne({name:room_name})
+    if(room){
+        return true
+    }else{
+        return false
+    }
+
+}
+
 module.exports = {
 
     //mutations
@@ -898,7 +909,10 @@ module.exports = {
     get_all_joined_rooms,
     get_all_created_rooms,
     get_common_rooms,
-    get_room_demographics
+    get_room_demographics,
+
+    //room input extra checks
+    check_room_name
 
 
 }

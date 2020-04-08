@@ -373,6 +373,7 @@ module.exports = gql`
         get_all_created_rooms(user_id:ID):[Room_demographic!]!
         get_common_rooms(user_ids:[ID!]!):[Room_demographic!]!
         get_room_demographics(room_id:ID!):Room_demographic!
+        check_room_name(room_name:String!):Boolean!
 
         #aws s3 image upload access 
         get_image_upload_url(user_input:get_image_upload_url_input):String!

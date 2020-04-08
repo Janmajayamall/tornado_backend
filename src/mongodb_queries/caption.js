@@ -25,7 +25,7 @@ async function create_caption(db_structure, user_id,caption_object){
     //creator_info
     const creator_info = await get_user_info(db_structure, user_id)
     caption_res.creator_info=creator_info   
-    caption_object.is_user=true  
+    caption_res.is_user=true  
 
     return caption_res
 }
