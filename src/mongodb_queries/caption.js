@@ -181,7 +181,11 @@ async function get_post_captions(db_structure, user_id, post_id){
                         else:false
                     }
                 }
-            }}
+            }},
+            {$sort:{
+                up_votes_count:-1,
+                down_votes_count:1
+            }},
         ]
     ).toArray()
 

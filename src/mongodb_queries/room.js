@@ -169,7 +169,7 @@ async function get_rooms(db_structure, user_id, filter_object){
         [
             // if the name filter is not undefined then run the text query, otherwise return all rooms
             name_filter.length!==0?
-                {$match: {status:"ACTIVE", $text:{$search:name_filter}}}:
+                {$match: {status:"ACTIVE", $text:{$search:{$regex:/r/i}}}}:
                 {$match: {status:"ACTIVE"}},
             {$lookup:{
                 from:db_structure.main_db.collections.room_follows,

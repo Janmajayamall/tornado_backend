@@ -90,24 +90,16 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
-            const result = await mongodb_user_queries.get_user_info(context.db_structure, user_id)
+            //check whether user_id already exists in args or not. If not then populate it with current user id
+            let recv_user_id = args.user_id
+            if(!recv_user_id){
+                recv_user_id=user_id
+            }
+
+            validator_wrapper(objectid_validation(recv_user_id))
+
+            const result = await mongodb_user_queries.get_user_info(context.db_structure, recv_user_id)
             return result
-        },
-
-        async get_other_user_info(parent, args, context){
-
-            //authenticating the user
-            await verify_jwt(context.req_headers.authorization)
-
-            //checking for db instance in the context
-            db_instance_validation(context.db_structure.main_db)
-
-            //extracting other_user_id and validating it
-            const other_user_id = args.other_user_id
-            validator_wrapper(objectid_validation(other_user_id))
-
-            const result = await mongodb_user_queries.get_user_info(context.db_structure, user_id)
-            return result        
         },
 
         async check_email(parent, args, context){

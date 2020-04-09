@@ -156,11 +156,11 @@ module.exports = {
             //extracting user_id from args
             let creator_user_id = args.user_id
             //populating user _id
-            if(!user_id){
+            if(!creator_user_id){
                 creator_user_id = current_user_id
             }
-            validator_wrapper(objectid_validation(user_id))
-            
+            validator_wrapper(objectid_validation(creator_user_id))
+            console.log(creator_user_id)
             //getting all the rooms
             const result = await mongodb_room_queries.get_all_created_rooms(context.db_structure, creator_user_id, current_user_id)
             return result

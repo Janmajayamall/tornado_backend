@@ -380,8 +380,7 @@ module.exports = gql`
         get_image_upload_url(user_input:get_image_upload_url_input):String!
     
         #user
-        get_user_info:User_account!
-        get_other_user_info(other_user_id:ID!):User_account!
+        get_user_info(user_id:ID):User_account!
         check_email(email:String!):Boolean!
         check_username(username:String!):Boolean!
         password_recovery_send_code(email:String!):Boolean!
