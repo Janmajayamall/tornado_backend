@@ -270,7 +270,6 @@ async function password_recovery_send_code(db_structure, email){
         while(true){
             let temp_code = auth_utils.generate_password_verification_code()
             const veri_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.password_recovery_codes).findOne({verification_code:temp_code})
-            console.log(veri_check, "just making sure you know")
             if(!veri_check){
                 verification_code=temp_code //when code does not exists in collection password_recovery_codes
                 break
