@@ -61,6 +61,22 @@ module.exports = {
 
             const result = await mongodb_user_queries.edit_user_profile(context.db_structure, user_id, edit_user_profile_object)
             return result
+        },
+
+        async password_recovery_code_verification(parent, args, context){
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //extracting email
+            const change_password_object = {
+                password:args.password, 
+                verification_code:args.verification_code
+            }
+
+            //TODO: validate change_password_object
+
+            const result = await mongodb_user_queries.password_recovery_code_verification(context.db_structure, change_password_object)
+            return result
         }
     },
 
@@ -111,12 +127,23 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
-            //extracting email id
+            //extracting username
             const username = args.username
 
             const result = await mongodb_user_queries.check_username(context.db_structure, username)
             return result
-        }
+        },
+
+        async password_recovery_send_code(parent, args, context){
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //extracting email
+            const email = args.email
+
+            const result = await mongodb_user_queries.password_recovery_send_code(context.db_structure, email)
+            return result
+        },
 
     }
 }

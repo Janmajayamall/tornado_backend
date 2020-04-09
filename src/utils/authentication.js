@@ -76,9 +76,31 @@ async function verify_jwt(jwt){
 }
 
 
+function generate_password_verification_code(){
+
+    var digits = '0123456789';
+
+    var otp_length = 4;
+
+    var otp = '';
+
+    for(let i=1; i<=otp_length; i++)
+
+    {
+
+        var index = Math.floor(Math.random()*(digits.length));
+
+        otp = otp + digits[index];
+
+    }
+
+    return otp;
+}
+
 module.exports = {
     generate_password_hash:generate_password_hash,
     verify_password_hash:verify_password_hash,
     issue_jwt,
-    verify_jwt
+    verify_jwt,
+    generate_password_verification_code
 }

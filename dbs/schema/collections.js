@@ -411,6 +411,34 @@ async function create_votes_collection(){
     })
 }
 
+//password_recovery_code
+async function create_password_recovery_codes_collection() {
+
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.password_recovery_codes,{
+        validator:{
+            $jsonSchema:{
+                bsonType:"object",
+                required:["createdAt", "user_id"],
+                properties:{
+                    createdAt:{
+                        bsonType:"date",
+                        description:"createdAt must be a date(ISODate) and is required"
+                    },
+                    user_id:{
+                        bsonType:"objectId",
+                        description:"user_id must be a objectId and is required"
+                    },
+                    verification_code:{
+                        bsonType:"string",
+                        description:"verification_code must be a string and is required"
+                    }
+                }
+            }
+        }
+    })
+
+}
+
 module.exports={
     create_user_collection:create_user_collection,
     create_user_account_collection:create_user_account_collection,
@@ -421,5 +449,6 @@ module.exports={
     create_room_post_collection:create_room_post_collection,
     create_images_collection:create_images_collection,
     create_captions_collection:create_captions_collection,
-    create_votes_collection:create_votes_collection
+    create_votes_collection:create_votes_collection,
+    create_password_recovery_codes_collection
 }

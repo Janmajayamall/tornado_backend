@@ -326,6 +326,7 @@ module.exports = gql`
         register_user(user_input:register_user_input):User!,
         login_user(user_input:login_user_input):User!,
         edit_user_profile(user_input:edit_user_profile_input):User_account!
+        password_recovery_code_verification(verification_code:String!, password:String!):Boolean!
 
         #rooms
         create_room(user_input:room_input):Room_demographic!,
@@ -383,7 +384,7 @@ module.exports = gql`
         get_other_user_info(other_user_id:ID!):User_account!
         check_email(email:String!):Boolean!
         check_username(username:String!):Boolean!
-
+        password_recovery_send_code(email:String!):Boolean!
 
         #captions
         get_post_captions(post_id:ID!):[Caption!]!

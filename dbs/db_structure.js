@@ -12,6 +12,7 @@ module.exports = {
             images:"images",
             captions:"captions",
             votes:"votes",
+            password_recovery_codes:"password_recovery_codes"
         },
         db_instance:null
     },

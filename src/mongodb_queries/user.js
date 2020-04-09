@@ -4,6 +4,7 @@ const {get_insert_one_result} = require("../utils/mongo_queries")
 const {DEFAULT_AVATAR, CLOUD_FRONT_URL} = require("./../utils/constants")
 const {ObjectID} = require("mongodb")
 const { delete_image_file } = require("./../utils/aws_operations")
+const sgMail = require('@sendgrid/mail');
 
 async function register_user(db_structure,  user_object){
 
@@ -255,6 +256,105 @@ async function check_username(db_structure, username){
 
 }
 
+async function password_recovery_send_code(db_structure, email){
+
+    const user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOne({email:email})
+    
+    //if user exists, then send code to the email id. If not then return false
+    if(user){
+
+        const user_account = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).findOne({user_id:user._id})
+
+        // generate verification code. In loop till we don't find a verification code that is not already in use, as verification codes are generated randomly
+        let verification_code = undefined
+        while(true){
+            let temp_code = auth_utils.generate_password_verification_code()
+            const veri_check = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.password_recovery_codes).findOne({verification_code:temp_code})
+            console.log(veri_check, "just making sure you know")
+            if(!veri_check){
+                verification_code=temp_code //when code does not exists in collection password_recovery_codes
+                break
+            }
+        }
+        console.log({
+            createdAt:new Date(),
+            user_id:ObjectID(user._id),
+            verification_code:verification_code
+        })
+        //storing code in password_reset_codes collection
+        const insert_code_op = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.password_recovery_codes).insertOne({
+            createdAt:new Date(),
+            user_id:ObjectID(user._id),
+            verification_code:verification_code
+        })
+
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+        const msg = {
+            from:{
+                "email":"janmajaya.choithram@gmail.com"
+             },
+            personalizations:[
+                {
+                   to:[
+                        {
+                            email:"janmajayamall18@gmail.com" //TODO: change it with user.email
+                        }
+                   ],
+                   dynamic_template_data:{
+                      username:user_account.username,
+                      verification_code:verification_code
+                    }
+                }
+            ],
+            template_id:"d-cbbbf6c844ed43ea9f3786f28b20884d" // template ID of the email
+        }
+         
+        //sending the code to user's email id
+        try {
+            const response = await sgMail.send(msg);   
+            return true     
+        } catch (error) {
+            if (error.response) {
+              console.error(error.response.body)
+            }
+            throw new ApolloError("Send grid Error", error)
+        }    
+    }else{
+        return false
+    }
+}
+
+async function password_recovery_code_verification(db_structure, change_password_object){
+
+    const verification_object = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.password_recovery_codes).findOne({verification_code:change_password_object.verification_code})
+
+    if(verification_object){
+
+        //change the password
+        const hash = await auth_utils.generate_password_hash(change_password_object.password)
+        if (hash === null){
+            throw new ApolloError("hash generated is null")
+        }
+
+        //updating the password
+        const update_users = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOneAndUpdate({
+            "_id":ObjectID(verification_object.user_id)    
+            },{
+                $set:{
+                    hash:hash,
+                    last_modified:new Date()
+                }
+            }, {returnOriginal:false})
+
+        return true 
+    }else{
+        //verification code has either expired or not valid
+        return false 
+    }
+
+}
+
 module.exports = {
     register_user,
     login_user,
@@ -263,5 +363,7 @@ module.exports = {
 
     //registration checks
     check_email,
-    check_username
+    check_username,
+    password_recovery_send_code, //sending password recovery code
+    password_recovery_code_verification
 }
