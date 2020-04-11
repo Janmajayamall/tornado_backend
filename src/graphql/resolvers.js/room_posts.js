@@ -50,7 +50,7 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
-            const room_post_id = args._id
+            const room_post_id = args.post_id
             //validate the input
             validator_wrapper(objectid_validation(room_post_id))
 

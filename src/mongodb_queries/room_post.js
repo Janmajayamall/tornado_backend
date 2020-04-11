@@ -74,7 +74,7 @@ async function deactivate_room_post(db_structure, room_post_id){
                                                                                                                                 }, { returnOriginal:false})
 
     room_post_res = room_post_res.value
-    return room_post_res                                                                                                                                
+    return room_post_res._id                                                                                                                               
 }
 
 async function edit_room_post(db_structure, room_post_id, room_post_edit_object){

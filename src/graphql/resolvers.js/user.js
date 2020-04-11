@@ -87,7 +87,7 @@ module.exports = {
             //authenticating the user
             const user_id = await verify_jwt(context.req_headers.authorization)
 
-            //checking for db instance in the context
+        //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
             //check whether user_id already exists in args or not. If not then populate it with current user id
@@ -119,10 +119,17 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
+            //checking whether authorization is present or not
+            let user_id = undefined
+            if(context.req_headers.authorization){
+                user_id = await verify_jwt(context.req_headers.authorization)
+            }
+            console.log(user_id, "just making sure")
+
             //extracting username
             const username = args.username
 
-            const result = await mongodb_user_queries.check_username(context.db_structure, username)
+            const result = await mongodb_user_queries.check_username(context.db_structure, username, user_id)
             return result
         },
 

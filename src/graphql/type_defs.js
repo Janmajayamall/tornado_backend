@@ -346,7 +346,7 @@ module.exports = gql`
         #room_posts
         create_room_post(user_input:create_room_post_input):Room_post_feed!
         edit_room_post(_id:ID!, user_input:edit_room_post_input):Room_post!
-        deactivate_room_post(_id:ID!):Room_post!
+        deactivate_room_post(post_id:ID!):ID!
 
         #caption
         create_caption(user_input:create_caption_input):Caption!

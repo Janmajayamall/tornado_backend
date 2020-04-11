@@ -52,27 +52,29 @@ async function issue_jwt(user){
 
 async function verify_jwt(jwt){
 
-    const token = jwt.split(" ")[1].trim()
+    try{
+        const token = jwt.split(" ")[1].trim()
 
-    if (!token){
+        if (!token){
+            throw new AuthenticationError(`JWT should in format "Bearer [token]"`)
+        }
+
+        return jsonwebtoken.verify(token, PUB_KEY, {ignoreExpiration:true, algorithms:["RS256"]}, (err, payload)=>{
+
+            if (err && err.name === "TokenExpiredError"){
+                throw new AuthenticationError("Token Expired")
+            }
+
+            if (err && err.name === "JsonWebTokenError"){ 
+                throw new AuthenticationError("JWT malformed")
+            }
+
+            return payload.sub
+
+        }) 
+    }catch(e){
         throw new AuthenticationError(`JWT should in format "Bearer [token]"`)
     }
-
-    return jsonwebtoken.verify(token, PUB_KEY, {ignoreExpiration:true, algorithms:["RS256"]}, (err, payload)=>{
-
-        if (err && err.name === "TokenExpiredError"){
-            throw new AuthenticationError("Token Expired")
-        }
-
-        if (err && err.name === "JsonWebTokenError"){ 
-            throw new AuthenticationError("JWT malformed")
-        }
-
-        return payload.sub
-
-    })
-
-
 }
 
 

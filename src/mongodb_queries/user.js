@@ -98,7 +98,8 @@ async function login_user(db_structure, user_object){
         }
         
         //verifying password
-        let result = auth_utils.verify_password_hash(user.hash, user_object.password)
+        let result = await auth_utils.verify_password_hash(user.hash, user_object.password)
+        console.log(result)
         if (!result){
             throw new AuthenticationError("Incorrect password or email")
         }
@@ -244,12 +245,17 @@ async function check_email(db_structure, email){
 
 }
 
-async function check_username(db_structure, username){
+async function check_username(db_structure, username, user_id=undefined){
 
     const user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).findOne({username:username})
 
     if(user){
-        return true
+        //check whether same user is request for their own username or not 
+        if(user.user_id.equals(ObjectID(user_id))){
+            return false
+        }else{
+            return true
+        }
     }else{
         return false
     }
