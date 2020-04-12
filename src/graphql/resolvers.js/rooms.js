@@ -2,7 +2,8 @@ const mongodb_room_queries = require("./../../mongodb_queries/room")
 const {validator_wrapper, 
         create_room_validation, 
         toggle_follow_room_validation,
-        objectid_validation,    
+        objectid_validation, 
+        bulk_follow_room_validation   
         } = require("./../../utils/validator")
 const {db_instance_validation,} = require("./../../utils/general_checks")
 const {UserInputError} = require("apollo-server-express")
@@ -84,10 +85,12 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             const bulk_follow_room_object = args.user_input
-            //TODO:validating the input
-            console.log(bulk_follow_room_object,"athis")
+            //validating bulk_follow_room_object arr
+            validator_wrapper(bulk_follow_room_validation(bulk_follow_room_object))
+            
+            
             let result = await mongodb_room_queries.bulk_follow_rooms(context.db_structure, bulk_follow_room_object)
-            console.log(result, "aws")
+            
             return result            
         }   
 
@@ -160,7 +163,7 @@ module.exports = {
                 creator_user_id = current_user_id
             }
             validator_wrapper(objectid_validation(creator_user_id))
-            console.log(creator_user_id)
+            
             //getting all the rooms
             const result = await mongodb_room_queries.get_all_created_rooms(context.db_structure, creator_user_id, current_user_id)
             return result

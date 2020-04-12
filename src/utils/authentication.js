@@ -17,6 +17,7 @@ async function generate_password_hash(password){
         hash = await bcrypt.hash(password, 10)
         return hash
     }catch(e){
+        console.error(e, "generate_password_hash function | authentication.js")
         throw Error(e)
     }
     
@@ -28,6 +29,7 @@ async function verify_password_hash(hash, password){
         result = await bcrypt.compare(password, hash)
         return result
     }catch(e){
+        console.error(e, "verify_password_hash | authentication.js")
         throw Error(e)
     }
 
@@ -73,6 +75,7 @@ async function verify_jwt(jwt){
 
         }) 
     }catch(e){
+        console.error(e, "verify_jwt function | authentication.js")
         throw new AuthenticationError(`JWT should in format "Bearer [token]"`)
     }
 }

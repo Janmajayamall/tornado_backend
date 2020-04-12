@@ -99,7 +99,7 @@ async function login_user(db_structure, user_object){
         
         //verifying password
         let result = await auth_utils.verify_password_hash(user.hash, user_object.password)
-        console.log(result)
+        
         if (!result){
             throw new AuthenticationError("Incorrect password or email")
         }
@@ -281,11 +281,7 @@ async function password_recovery_send_code(db_structure, email){
                 break
             }
         }
-        console.log({
-            createdAt:new Date(),
-            user_id:ObjectID(user._id),
-            verification_code:verification_code
-        })
+        
         //storing code in password_reset_codes collection
         const insert_code_op = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.password_recovery_codes).insertOne({
             createdAt:new Date(),
@@ -321,7 +317,7 @@ async function password_recovery_send_code(db_structure, email){
             return true     
         } catch (error) {
             if (error.response) {
-              console.error(error.response.body)
+              console.error(error.response.body,"password_recovery_send_code function | user.js" )
             }
             throw new ApolloError("Send grid Error", error)
         }    

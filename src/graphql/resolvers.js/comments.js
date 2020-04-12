@@ -1,5 +1,5 @@
 const mongodb_comments_queries = require("./../../mongodb_queries/comment")
-const {create_comment_validation, edit_comment_validation, validator_wrapper, objectid_validation} = require("./../../utils/validator")
+const {create_comment_validation, edit_comment_validation, validator_wrapper, objectid_validation, get_post_comments_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 const {db_instance_validation} = require("./../../utils/general_checks")
 const {verify_jwt} = require("./../../utils/authentication")
@@ -74,7 +74,8 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             const comment_query_object = args.user_input
-            //TODO: validate comment_query_object
+            //validate comment_query_object
+            validator_wrapper(get_post_comments_validation(comment_query_object))
 
             //getting the comment_object
             const result = await mongodb_comments_queries.get_post_comments(context.db_structure, user_id, comment_query_object)

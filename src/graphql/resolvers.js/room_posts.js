@@ -77,7 +77,7 @@ module.exports = {
 
             //getting room_posts matching user_id
             const result = await mongodb_room_post_queries.get_room_posts_user_id(context.db_structure, user_id, get_room_post_object)
-            console.log(result, "it is get_room_posts_user_id")
+            
             return result
 
         },

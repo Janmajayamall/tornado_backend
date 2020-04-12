@@ -1,5 +1,5 @@
 const mongodb_caption_queries = require("./../../mongodb_queries/caption")
-const {create_like_validation, unlike_content_validation, validator_wrapper, objectid_validation} = require("./../../utils/validator")
+const {create_like_validation, unlike_content_validation, validator_wrapper, objectid_validation, create_caption_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 const {verify_jwt} = require("./../../utils/authentication")
 const {db_instance_validation} = require("./../../utils/general_checks")
@@ -15,8 +15,10 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
         
-            //extracting caption_input TODO: validate caption_input
+            //extracting caption_input 
             const caption_input = args.user_input
+            // validate caption_input
+            validator_wrapper(create_caption_validation(caption_input))
 
             const result = await mongodb_caption_queries.create_caption(context.db_structure, user_id,caption_input)
             return result

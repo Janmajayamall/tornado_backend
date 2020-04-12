@@ -19,14 +19,10 @@ function user_register_validation(user_object){
 
     if (user_object.username.trim() === ""){
         errors.username = "username must not be empty"
-    }else if(user_object.username.length > 150){
-        errors.username = "please choose a smaller username (username cannot be longer than 150 chars)"
     }
 
     if (user_object.password.trim() === ""){
         errors.password = "password must not be empty"
-    }else if(user_object.password.length > 50 || user_object.password.length < 8){
-        errors.password = "password length should in range 8 to 50 (inclusive)"
     }
 
     if (!(user_object.age === parseInt(user_object.age, 10))){
@@ -42,10 +38,6 @@ function user_register_validation(user_object){
             errors.avatar = "avatar must be an object, with properties file name, width, height"
         }
     }
-
-    //TODO: add validation for three_words, name, bio, 
-
-
 
     return {
         errors,
@@ -74,6 +66,40 @@ function user_login_validation(user_object){
     
 }
 
+function edit_profile_validation(user_object){
+
+    const errors = {}
+
+    if (user_object.username.trim() === ""){
+        errors.username = "username must not be empty"
+    }
+
+    return {
+        errors,
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+function password_change_with_code_validation(change_password_object){
+
+    const errors = {}
+
+    if(change_password_object.password.trim()===""){
+        errors.password = "password must not be empty"
+    }
+
+    if(change_password_object.verification_code.trim()===""){
+        errors.verification_code = "verification_code must not be empty"
+    }
+
+    return {
+        errors,
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
 //end
 
 // rooms queries/mutations
@@ -94,7 +120,6 @@ function create_room_validation(object){
         errors.creator_id = "creator_id is not a valid ObjectID"
     }
 
-    //TODO: validate the length of the short description as well
     
     return {
         errors, 
@@ -118,6 +143,34 @@ function toggle_follow_room_validation(object){
     }else if(!(["ACTIVE", "NOT_ACTIVE"].includes(object.status.trim()))){
         errors.status="status should be either ACTIVE or NOT_ACTIVE"
     }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+function bulk_follow_room_validation(bulk_follow_room){
+
+    const errors = {}
+
+    if(bulk_follow_room.length===0){
+        return{
+            errors,
+            valid:true
+        }
+    }
+
+    bulk_follow_room.forEach(follow_object,index => {
+        const res_room = is_valid_objectid(follow_object.room_id)
+        const res_follower_id = is_valid_objectid(follow_object.follow_object.follower_id)
+
+        if(!res_room || !res_follower_id){
+            errors.bulk_follow_room_input = `follower_id or room_id must be object_ids`
+        }
+
+    })
 
     return {
         errors, 
@@ -166,8 +219,6 @@ function create_room_post_validation(object){
         }
     }
 
-    //TODO: Set limitations on characters for each string input
-
     return {
         errors, 
         valid: Object.keys(errors).length<1
@@ -210,6 +261,7 @@ function get_room_post_object_validation(object){
             let result = date_validation(object.room_post_cursor)
         }catch(e){
             errors.room_post_cursor = "room_post_cursor should be Date object in milliseconds"
+            
         }
 
     }
@@ -327,7 +379,107 @@ function edit_comment_validation(object){
 
 }
 
+function get_post_comments_validation(comment_query_object){
+
+    const errors = {}
+
+    if(comment_query_object.content_id.trim() ===""){
+        errors.content_id = "content_id must not be empty"
+    }else{
+        if(!is_valid_objectid(comment_query_object.content_id)){
+            errors.content_id = "content_id must be object_id"
+        }
+    }
+
+    if(comment_query_object.content_type.trim()===""){
+        errors.content_type =  "content_type must not be empty"
+    }
+
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
 //end
+
+// captions queries/mutations
+function create_caption_validation(create_caption_object){
+
+    const errors = {}
+
+    if(create_caption_object.post_id.trim()===""){
+        errors.post_id = "post_id must not be empty"
+    }else{
+        if(!is_valid_objectid(create_caption_object.post_id)){
+            errors.post_id = "post_id must be object_id"
+        }
+    }
+
+    if(create_caption_object.description.trim()===""){
+        errors.description = "description must not be empty"
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+    
+}
+
+//end
+
+// votes queries/mutations
+function toggle_vote_validation(vote_object){
+
+    const errors = {}
+
+    if(vote_object.content_id.trim()===""){
+        errors.content_id="content_id must not be empty"
+    }else{
+        if(!is_valid_objectid(vote_object.content_id)){
+            errors.content_id="content_id must be objectId"
+        }
+    }
+
+    if(!(["UP", "DOWN"].includes(vote_object.vote_type))){
+        errors.vote_type="vote_type must be UP or DOWN"
+    }
+
+    if(!(["CAPTION"].includes(vote_object.content_type))){
+        errors.content_type="content_type must be CAPTION"
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }
+
+}
+
+//end
+
+// aws_operations
+
+function get_image_url_validation(image_object){
+
+    const errors = {}
+
+    if(image_object.file_name===""){
+        errors.file_name="file_name must not be empty"
+    }
+
+    if(image_object.file_mime===""){
+        errors.file_mime="file_mime must not be empty"
+    }
+
+    return {
+        errors, 
+        valid: Object.keys(errors).length<1
+    }    
+}
 
 // general
 function is_valid_objectid(object_id){
@@ -385,14 +537,20 @@ function date_validation(date_value){
     return date
 }
 
+//end
+
+
 
 module.exports = {
     user_register_validation,
     user_login_validation,
+    edit_profile_validation,
+    password_change_with_code_validation,
 
     //room queries/mutations
     create_room_validation,
     toggle_follow_room_validation,
+    bulk_follow_room_validation,
 
     //room_posts queries/mutations
     create_room_post_validation,
@@ -406,6 +564,16 @@ module.exports = {
     //comments queries/mutations
     create_comment_validation, 
     edit_comment_validation,
+    get_post_comments_validation,
+
+    //captions queries/mutations
+    create_caption_validation,
+
+    //votes queries/mutations
+    toggle_vote_validation,
+
+    //aws operations
+    get_image_url_validation,
 
     //general
     objectid_validation,

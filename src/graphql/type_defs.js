@@ -110,7 +110,7 @@ module.exports = gql`
         is_user:Boolean!,
     }
 
-    # Mutation room input type  TODO:You might want to change status to ENUM from String
+    # Mutation room input type
     input room_input {
         name:String!,
         creator_id:ID!,

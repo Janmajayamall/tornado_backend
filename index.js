@@ -14,8 +14,7 @@ let mongodb_connections
 initialising_mongodb.connect_all_db().then(async database_connections => {
 
     mongodb_connections = database_connections
-    console.log(mongodb_connections)
-
+    console.log("Connected to mongodb")    
     //configuring dbs
     db_structure.main_db.db_instance = mongodb_connections.main_connection.db(db_structure.main_db.name)
   
@@ -32,7 +31,6 @@ initialising_mongodb.connect_all_db().then(async database_connections => {
     await collections.create_password_recovery_codes_collection()
 
     //creating indexes TODO: move this to separate file
-    await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).createIndex({name:"text"})
     await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.password_recovery_codes).createIndex( { "createdAt": 1 }, { expireAfterSeconds: 600 } )
     
 })

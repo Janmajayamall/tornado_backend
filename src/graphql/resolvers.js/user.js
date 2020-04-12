@@ -1,5 +1,5 @@
 const mongodb_user_queries = require("./../../mongodb_queries/user")
-const {user_register_validation, user_login_validation, validator_wrapper, objectid_validation} = require("./../../utils/validator")
+const {user_register_validation, user_login_validation, validator_wrapper, objectid_validation, edit_profile_validation, password_change_with_code_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 const {db_instance_validation} = require("./../../utils/general_checks")
 const {verify_jwt} = require("./../../utils/authentication")
@@ -14,14 +14,13 @@ module.exports = {
             const user_object = args.user_input
             //Validate the args
             validation_result = user_register_validation(user_object)
-            console.log(validation_result)
+            
             if (!validation_result.valid){
                 throw new UserInputError("Error", {
                     errors: validation_result.errors
                 })
             }
-            
-            console.log(user_object)
+                    
             result = await mongodb_user_queries.register_user(context.db_structure, user_object)
 
             return result 
@@ -57,7 +56,9 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             //edit_user_profile_object from user_input
-            const edit_user_profile_object = args.user_input //TODO: Validate the input 
+            const edit_user_profile_object = args.user_input 
+            //Validate the input 
+            validator_wrapper(edit_profile_validation(edit_user_profile_object))
 
             const result = await mongodb_user_queries.edit_user_profile(context.db_structure, user_id, edit_user_profile_object)
             return result
@@ -73,7 +74,8 @@ module.exports = {
                 verification_code:args.verification_code
             }
 
-            //TODO: validate change_password_object
+            // validate change_password_object
+            validator_wrapper(password_change_with_code_validation(change_password_object))
 
             const result = await mongodb_user_queries.password_recovery_code_verification(context.db_structure, change_password_object)
             return result
@@ -110,8 +112,16 @@ module.exports = {
             //extracting email id
             const email = args.email
 
+            if(!email){
+                throw new UserInputError("Error", {
+                    errors:{
+                        email:"Email id is must"
+                    }
+                })
+            }
+
             const result = await mongodb_user_queries.check_email(context.db_structure, email)
-            console.log(result)
+            
             return result
         },
 
@@ -124,7 +134,7 @@ module.exports = {
             if(context.req_headers.authorization){
                 user_id = await verify_jwt(context.req_headers.authorization)
             }
-            console.log(user_id, "just making sure")
+            
 
             //extracting username
             const username = args.username

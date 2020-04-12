@@ -36,7 +36,7 @@ async function create_room(db_structure, room_object){
     let room_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).insertOne(room_value)
     room_res = get_insert_one_result(room_res)
     const follow_res = await toggle_follow_room(db_structure, room_object.creator_id, {room_id:room_res._id, status:"ACTIVE"})
-    console.log(follow_res, "after")
+    
     room_res.room_members_count=1
     room_res.user_follows=true
     room_res.is_user=true
@@ -291,7 +291,7 @@ async function get_rooms(db_structure, user_id, filter_object){
 }
 
 async function get_not_joined_rooms(db_structure, user_id){
-    console.log(user_id, "as")
+    
     // const result = await helper_get_followed_rooms(db_structure, user_id)
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate([
 

@@ -1,5 +1,5 @@
 const mongodb_vote_queries = require("./../../mongodb_queries/vote")
-const {create_like_validation, unlike_content_validation, validator_wrapper, objectid_validation} = require("./../../utils/validator")
+const {validator_wrapper, toggle_vote_validation} = require("./../../utils/validator")
 const {UserInputError} = require("apollo-server-express")
 const {verify_jwt} = require("./../../utils/authentication")
 const {db_instance_validation} = require("./../../utils/general_checks")
@@ -16,8 +16,8 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
         
             const vote_object = args.user_input
-            
-            //TODO: validate the input 
+            //validate the input 
+            validator_wrapper(toggle_vote_validation(vote_object))
 
             const result = await mongodb_vote_queries.toggle_vote(context.db_structure, user_id,vote_object)
             return result
