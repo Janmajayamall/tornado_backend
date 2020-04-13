@@ -20,8 +20,6 @@ async function connect_all_db(){
     try{
         // connecting to Mongodb server uri
         let MONGO_URL = process.env.MONGODB_URL
-        console.log(process.env.MONGODB_URL)
-        console.log(process.env.NODE_ENV)
 
         if(MONGO_URL===undefined){
             throw new Error("MONGO_URL not defined; process.env not set")

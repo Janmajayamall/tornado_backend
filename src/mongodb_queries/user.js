@@ -64,7 +64,7 @@ async function register_user(db_structure,  user_object){
 
         //Generate jwt
         let jwt = await auth_utils.issue_jwt(result_user)
-
+        
         //generating the response and populating with the avatar object
         let result = {
             ...result_user_account,

@@ -15,8 +15,6 @@ module.exports = {
 
         async get_image_upload_url(parent, args, context){      
 
-            await verify_jwt(context.req_headers.authorization)
-
             const image_object = args.user_input
             //validate image_object
             validator_wrapper(get_image_url_validation(image_object))
