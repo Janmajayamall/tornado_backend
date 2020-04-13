@@ -5,8 +5,7 @@ const collections = require("./dbs/schema/collections")
 const type_defs = require("./src/graphql/type_defs")
 const resolvers = require("./src/graphql/resolvers.js/index")
 const db_structure = require("./dbs/db_structure")
-
-
+const bugsnap_client = require("./bugsnag/bugsnag")
 //connecting to the database
 let mongodb_connections
 
@@ -38,6 +37,8 @@ initialising_mongodb.connect_all_db().then(async database_connections => {
 
 // Initialising the app 
 const app = express()
+var middleware = bugsnap_client.getPlugin('express')
+app.use(middleware.errorHandler)
 
 //Initialising ApolloServer
 const server = new ApolloServer({

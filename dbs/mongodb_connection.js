@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient
 const Logger = require('mongodb').Logger
+const bugsnap_client = require("./../bugsnag/bugsnag")
 
 
 // connecting to Mongodb server
@@ -19,14 +20,13 @@ function connect(url){
 }
 
 async function connect_all_db(){
-    
     try{
         let database_list = await Promise.all([connect(DEV_URI)])
-
         return{
             main_connection:database_list[0]
         }
     }catch(e){
+        bugsnap_client.notify("not connected to db")
         console.error(e, "Unable to connect to the database");
         process.exit();
     }

@@ -3,6 +3,8 @@ const jsonwebtoken = require("jsonwebtoken")
 const fs = require("fs")
 const path = require("path")
 const {AuthenticationError} = require("apollo-server-express")
+const bugsnap_client = require("./../../bugsnag/bugsnag")
+
 
 //importing PRIV_KEY
 const path_to_priv_key = path.join(__dirname, "../../", "id_rsa_priv.pem")
@@ -17,6 +19,7 @@ async function generate_password_hash(password){
         hash = await bcrypt.hash(password, 10)
         return hash
     }catch(e){
+        bugsnap_client.notify(e)
         console.error(e, "generate_password_hash function | authentication.js")
         throw Error(e)
     }
@@ -29,6 +32,7 @@ async function verify_password_hash(hash, password){
         result = await bcrypt.compare(password, hash)
         return result
     }catch(e){
+        bugsnap_client.notify(e)
         console.error(e, "verify_password_hash | authentication.js")
         throw Error(e)
     }
@@ -75,6 +79,7 @@ async function verify_jwt(jwt){
 
         }) 
     }catch(e){
+        bugsnap_client.notify(e)
         console.error(e, "verify_jwt function | authentication.js")
         throw new AuthenticationError(`JWT should in format "Bearer [token]"`)
     }

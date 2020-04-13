@@ -5,6 +5,7 @@ const {DEFAULT_AVATAR, CLOUD_FRONT_URL} = require("./../utils/constants")
 const {ObjectID} = require("mongodb")
 const { delete_image_file } = require("./../utils/aws_operations")
 const sgMail = require('@sendgrid/mail');
+const bugsnap_client = require("./../../bugsnag/bugsnag")
 
 async function register_user(db_structure,  user_object){
 
@@ -62,7 +63,7 @@ async function register_user(db_structure,  user_object){
         result_user_account = get_insert_one_result(result_user_account)
 
         //Generate jwt
-        let jwt = auth_utils.issue_jwt(result_user)
+        let jwt = await auth_utils.issue_jwt(result_user)
 
         //generating the response and populating with the avatar object
         let result = {
@@ -105,7 +106,7 @@ async function login_user(db_structure, user_object){
         }
 
         //Generate jwt
-        let jwt = auth_utils.issue_jwt(user)
+        let jwt = await auth_utils.issue_jwt(user)
 
         //getting user info
         let user_info = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).findOne({user_id:user._id})
@@ -317,7 +318,8 @@ async function password_recovery_send_code(db_structure, email){
             return true     
         } catch (error) {
             if (error.response) {
-              console.error(error.response.body,"password_recovery_send_code function | user.js" )
+                bugsnap_client.notify(error.response.body)
+                console.error(error.response.body,"password_recovery_send_code function | user.js" )
             }
             throw new ApolloError("Send grid Error", error)
         }    

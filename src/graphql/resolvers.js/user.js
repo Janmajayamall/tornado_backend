@@ -42,7 +42,7 @@ module.exports = {
             } 
 
             result = await mongodb_user_queries.login_user(context.db_structure, user_object)
-
+            
             return result
 
         },
