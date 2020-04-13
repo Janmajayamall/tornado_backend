@@ -162,9 +162,9 @@ function bulk_follow_room_validation(bulk_follow_room){
         }
     }
 
-    bulk_follow_room.forEach(follow_object,index => {
+    bulk_follow_room.forEach(follow_object => {
         const res_room = is_valid_objectid(follow_object.room_id)
-        const res_follower_id = is_valid_objectid(follow_object.follow_object.follower_id)
+        const res_follower_id = is_valid_objectid(follow_object.follower_id)
 
         if(!res_room || !res_follower_id){
             errors.bulk_follow_room_input = `follower_id or room_id must be object_ids`
