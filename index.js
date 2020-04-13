@@ -77,12 +77,24 @@ function close_mongodb_connection(connection){
 
 //when nodemon restarts 
 process.once('SIGUSR2', async function(){
-    await Promise.all([close_mongodb_connection(mongodb_connections.main_connection)])
-    process.kill(process.pid, 'SIGUSR2');
+    try{
+        await Promise.all([close_mongodb_connection(mongodb_connections.main_connection)])
+        process.kill(process.pid, 'SIGUSR2');
+    }catch(e){
+        bugsnap_client.notify(e)
+        process.exit(1)
+    }
+
 })
 
 // when app terminates
 process.on('SIGINT', async function() {
-    await Promise.all([close_mongodb_connection(mongodb_connections.main_connection)])
-    process.exit(0);
+    try{
+        await Promise.all([close_mongodb_connection(mongodb_connections.main_connection)])
+        process.exit(0)
+    }catch(e){
+        bugsnap_client.notify(e)
+        process.exit(1)
+    }
+    
 });
