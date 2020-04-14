@@ -183,13 +183,14 @@ async function get_rooms(db_structure, user_id, filter_object){
     if(filter_object && filter_object.name_filter){
         name_filter=filter_object.name_filter
     }
+    name_filter=name_filter.toLowerCase() //converting name filter of lower case, as all room_names are in lower case
 
     //getting the rooms with populated bool value of whether user follows the room or not
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
         [
             // if the name filter is not undefined then run the text query, otherwise return all rooms
             name_filter.length!==0?
-                {$match: {status:"ACTIVE", $text:{$search:{$regex:/r/i}}}}:
+                {$match: {status:"ACTIVE", name:new RegExp(name_filter, "i")}}:
                 {$match: {status:"ACTIVE"}},
             {$lookup:{
                 from:db_structure.main_db.collections.room_follows,
