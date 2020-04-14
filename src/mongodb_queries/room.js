@@ -161,7 +161,7 @@ async function follow_tornado(db_structure, user_id){
 
     //toggle follow room tornado
     const toggle_follow_res = await toggle_follow_room(db_structure, user_id, {
-        room_id:res[0]._id,
+        room_id:res._id,
         status:"ACTIVE"
     })
 
