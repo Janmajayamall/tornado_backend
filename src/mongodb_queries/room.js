@@ -152,7 +152,6 @@ async function bulk_follow_rooms(db_structure, bulk_follow_room_object){
 async function follow_tornado(db_structure, user_id){
 
     const res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).findOne({name:"tornado"})
-    console.log(res)
 
     //if no room named tornado, then return
     if(res.length===0){
@@ -164,8 +163,6 @@ async function follow_tornado(db_structure, user_id){
         room_id:res._id,
         status:"ACTIVE"
     })
-
-    console.log(toggle_follow_res)
 
     return res
 

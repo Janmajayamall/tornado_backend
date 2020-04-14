@@ -82,7 +82,6 @@ async function register_user(db_structure,  user_object){
         }
 
         const follow_tornado = await mongodb_room_queries.follow_tornado(db_structure, result.user_id)
-        console.log(follow_tornado, "hp gaya follow")
 
         return result
 
