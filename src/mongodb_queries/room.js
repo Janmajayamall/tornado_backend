@@ -185,6 +185,17 @@ async function get_rooms(db_structure, user_id, filter_object){
     }
     name_filter=name_filter.toLowerCase() //converting name filter of lower case, as all room_names are in lower case
 
+    //removing spaces from filter (optimization step)
+    if(name_filter.length!==0){
+        let temp_filter = ""
+        for (ch of name_filter){
+            if(ch!==" "){
+                temp_filter+=ch
+            }
+        }
+        name_filter=temp_filter
+    }
+    
     //getting the rooms with populated bool value of whether user follows the room or not
     const rooms = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).aggregate(
         [
