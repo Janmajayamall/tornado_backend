@@ -6,6 +6,7 @@ const {ObjectID} = require("mongodb")
 const { delete_image_file } = require("./../utils/aws_operations")
 const sgMail = require('@sendgrid/mail');
 const bugsnap_client = require("./../../bugsnag/bugsnag")
+const mongodb_room_queries = require("./room")
 
 async function register_user(db_structure,  user_object){
 
@@ -79,6 +80,9 @@ async function register_user(db_structure,  user_object){
                 cdn_url:CLOUD_FRONT_URL
             }
         }
+
+        const follow_tornado = await mongodb_room_queries.follow_tornado(db_structure, result.user_id)
+        console.log(follow_tornado, "hp gaya follow")
 
         return result
 

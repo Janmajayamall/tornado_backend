@@ -1,7 +1,8 @@
 const {UserInputError, ApolloError, AuthenticationError} = require("apollo-server-express")
 const {get_insert_one_result} = require("../utils/mongo_queries")
 const {ObjectID} = require("mongodb")
-const { CLOUD_FRONT_URL } = require("./../utils/constants")
+const { CLOUD_FRONT_URL, TORNADO_ROOM_ID } = require("./../utils/constants")
+
 
 //mutations resolvers
 
@@ -145,6 +146,28 @@ async function bulk_follow_rooms(db_structure, bulk_follow_room_object){
 
     let bulk_follow_result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).insertMany(popu_follow_room_object)
     return bulk_follow_result.ops
+
+}
+
+async function follow_tornado(db_structure, user_id){
+
+    const res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).findOne({name:"tornado"})
+    console.log(res)
+
+    //if no room named tornado, then return
+    if(res.length===0){
+        return
+    }
+
+    //toggle follow room tornado
+    const toggle_follow_res = await toggle_follow_room(db_structure, user_id, {
+        room_id:res[0]._id,
+        status:"ACTIVE"
+    })
+
+    console.log(toggle_follow_res)
+
+    return res
 
 }
 
@@ -901,6 +924,7 @@ module.exports = {
     reactivate_room,
     toggle_follow_room,
     bulk_follow_rooms,
+    follow_tornado,
 
     //queries
     find_followed_rooms,
