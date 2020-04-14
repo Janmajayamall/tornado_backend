@@ -297,13 +297,13 @@ async function password_recovery_send_code(db_structure, email){
 
         const msg = {
             from:{
-                "email":"janmajaya.choithram@gmail.com"
+                "email":"tornado.helpdesk.in@gmail.com"
              },
             personalizations:[
                 {
                    to:[
                         {
-                            email:"janmajayamall18@gmail.com" //TODO: change it with user.email
+                            email:user.email
                         }
                    ],
                    dynamic_template_data:{

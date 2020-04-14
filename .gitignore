@@ -3,4 +3,9 @@ node_modules
 .vscode
 id_rsa_priv.pem
 ecosystem.config.js
+
+# SCRIPTS
 deploy.sh
+prod_ec2_connect.sh 
+deploy_npm.sh
+scp_trasfer_ec2.sh
