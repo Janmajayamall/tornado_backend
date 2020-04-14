@@ -154,7 +154,7 @@ async function follow_tornado(db_structure, user_id){
     const res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.rooms).findOne({name:"tornado"})
 
     //if no room named tornado, then return
-    if(res.length===0){
+    if(!res){
         return
     }
 
