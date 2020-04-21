@@ -3,6 +3,7 @@ node_modules
 .vscode
 id_rsa_priv.pem
 ecosystem.config.js
+id_rsa_pub.pem
 
 # SCRIPTS
 deploy.sh
