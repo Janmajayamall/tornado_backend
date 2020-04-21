@@ -26,11 +26,11 @@ function genKeyPair() {
         Uncomment lines below to 
         generate & store key pairs
     */
-    // Create the public key file
-    fs.writeFileSync(__dirname + '/id_rsa_pub.pem', keyPair.publicKey); 
+    // // Create the public key file
+    // fs.writeFileSync(__dirname + '/id_rsa_pub.pem', keyPair.publicKey); 
     
-    // Create the private key file
-    fs.writeFileSync(__dirname + '/id_rsa_priv.pem', keyPair.privateKey);
+    // // Create the private key file
+    // fs.writeFileSync(__dirname + '/id_rsa_priv.pem', keyPair.privateKey);
 
 }
 
