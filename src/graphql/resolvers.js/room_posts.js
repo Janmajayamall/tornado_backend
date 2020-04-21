@@ -45,7 +45,7 @@ module.exports = {
         async deactivate_room_post(parents, args, context){
 
             //authenticating the user
-            await verify_jwt(context.req_headers.authorization)
+            const user_id = await verify_jwt(context.req_headers.authorization)
 
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
@@ -54,7 +54,7 @@ module.exports = {
             //validate the input
             validator_wrapper(objectid_validation(room_post_id))
 
-            const result = await mongodb_room_post_queries.deactivate_room_post(context.db_structure, room_post_id)
+            const result = await mongodb_room_post_queries.deactivate_room_post(context.db_structure, room_post_id, user_id)
             return result
         },
 
@@ -116,7 +116,7 @@ module.exports = {
             validator_wrapper(get_user_profile_posts_validation(get_user_profile_posts_object))
 
             //getting the result
-            const result = await mongodb_room_post_queries.get_user_profile_posts(context.db_structure, get_user_profile_posts_object)
+            const result = await mongodb_room_post_queries.get_user_profile_posts(context.db_structure, get_user_profile_posts_object, current_user_id)
             return result            
         }
 

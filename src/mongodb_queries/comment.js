@@ -47,7 +47,13 @@ async function delete_comment(db_structure, user_id, comment_id){
             user_id:ObjectID(user_id)
         }
     )
+    
     result = result.value
+    
+    if(!result){
+        return ""
+    }
+        
     return result._id                                                                                                                             
 }
 

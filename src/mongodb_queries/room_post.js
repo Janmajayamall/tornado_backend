@@ -61,7 +61,15 @@ async function create_room_post(db_structure, room_post_object){
     return room_post_res 
 }
 
-async function deactivate_room_post(db_structure, room_post_id){
+async function deactivate_room_post(db_structure, room_post_id, user_id){
+
+    //checking whether user is the creator of the post of not
+    let room_post = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).findOne({_id:ObjectID(room_post_id)})
+
+    if(!room_post ||!ObjectID(user_id).equals(room_post.creator_id)){
+        
+        return ""
+    }
 
     //deactivate the room_post
     let room_post_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_posts).findOneAndUpdate({
@@ -873,10 +881,11 @@ async function get_room_posts_room_id(db_structure, user_id, get_room_post_objec
 
 }
 
-async function get_user_profile_posts(db_structure, get_user_profile_posts_object){    
+async function get_user_profile_posts(db_structure, get_user_profile_posts_object, current_user_id){    
 
     //extracting user_id
     const {user_id} = get_user_profile_posts_object
+    
 
     //CONSTANTS
     const POST_LIMIT = 5
@@ -1146,7 +1155,7 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                         },
                         is_user:{
                             $cond:{
-                                if: {eq:[ObjectID(user_id), "$creator_id"]},
+                                if: {eq:[ObjectID(current_user_id), "$creator_id"]},
                                 then:true,
                                 else:false
                             }
@@ -1208,7 +1217,7 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
                     },
                     is_user:{
                         $cond:{
-                            if: {$eq:[ObjectID(user_id), "$creator_id"]},
+                            if: {$eq:[ObjectID(current_user_id), "$creator_id"]},
                             then:true,
                             else:false
                         }

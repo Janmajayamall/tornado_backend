@@ -38,8 +38,13 @@ async function delete_caption(db_structure, user_id, caption_id){
             creator_id:ObjectID(user_id)
         }
     )
-
+    
     result=result.value   //retrieving copy of deleted document
+    
+    if(!result){
+        return ""
+    }
+    
     return result._id
 }
 
