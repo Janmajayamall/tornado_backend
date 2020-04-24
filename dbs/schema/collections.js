@@ -439,6 +439,41 @@ async function create_password_recovery_codes_collection() {
 
 }
 
+//block user
+async function create_blocked_users_collection(){
+
+    var result = await db_structure.main_db.db_instance.createCollection(db_structure.main_db.collections.blocked_users,{
+        validator:{
+            $jsonSchema:{
+                bsonType:"object",
+                required:["user_id", "blocked_user_id"],
+                properties:{
+                    user_id:{
+                        bsonType:"objectId",
+                        description:"user_id must be a objectId and is required"
+                    },
+                    blocked_user_id:{
+                        bsonType:"objectId",
+                        description:"user_id must be a objectId and is required"
+                    },
+                    timestamp:{
+                        bsonType:"date",
+                        description:"timestamp must be date(ISODate) and is required"
+                    },
+                    last_modified:{
+                        bsonType:"date",
+                        description:"last_modified must be date(ISODate) and is required"
+                    },
+                    status:{
+                        enum:["ACTIVE", "NOT_ACTIVE"],
+                        description:"status must be ACTIVE or NOT_ACTIVE and is required"
+                    }                   
+                }
+            }
+        }
+    })
+}
+
 module.exports={
     create_user_collection:create_user_collection,
     create_user_account_collection:create_user_account_collection,
@@ -450,5 +485,6 @@ module.exports={
     create_images_collection:create_images_collection,
     create_captions_collection:create_captions_collection,
     create_votes_collection:create_votes_collection,
-    create_password_recovery_codes_collection
+    create_password_recovery_codes_collection,
+    create_blocked_users_collection:create_blocked_users_collection
 }

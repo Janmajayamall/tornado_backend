@@ -79,6 +79,38 @@ module.exports = {
 
             const result = await mongodb_user_queries.password_recovery_code_verification(context.db_structure, change_password_object)
             return result
+        },
+
+        async block_user(parent, args, context){
+            // authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //edit_user_profile_object from user_input
+            const blocked_user_id = args.blocked_user_id
+            //Validate the input 
+            validator_wrapper(objectid_validation(blocked_user_id))
+
+            const result = await mongodb_user_queries.block_user(context.db_structure, user_id, blocked_user_id)
+            return result
+        },
+
+        async unblock_user(parent, args, context){
+            // authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            //edit_user_profile_object from user_input
+            const blocked_user_id = args.blocked_user_id
+            //Validate the input 
+            validator_wrapper(objectid_validation(blocked_user_id))
+
+            const result = await mongodb_user_queries.unblock_user(context.db_structure, user_id, blocked_user_id)
+            return result
         }
     },
 
@@ -89,7 +121,7 @@ module.exports = {
             //authenticating the user
             const user_id = await verify_jwt(context.req_headers.authorization)
 
-        //checking for db instance in the context
+            //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
             //check whether user_id already exists in args or not. If not then populate it with current user id
@@ -100,8 +132,21 @@ module.exports = {
 
             validator_wrapper(objectid_validation(recv_user_id))
 
-            const result = await mongodb_user_queries.get_user_info(context.db_structure, recv_user_id)
+            const result = await mongodb_user_queries.get_user_info(context.db_structure, recv_user_id, user_id)
             return result
+        },
+
+        async get_blocked_users(parent, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+            
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            const result = await mongodb_user_queries.get_blocked_users(context.db_structure, user_id)
+            return result
+
         },
 
         async check_email(parent, args, context){

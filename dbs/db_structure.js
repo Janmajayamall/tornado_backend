@@ -12,7 +12,8 @@ module.exports = {
             images:"images",
             captions:"captions",
             votes:"votes",
-            password_recovery_codes:"password_recovery_codes"
+            password_recovery_codes:"password_recovery_codes",
+            blocked_users:"blocked_users"
         },
         db_instance:null
     },

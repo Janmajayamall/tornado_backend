@@ -199,7 +199,58 @@ async function edit_user_profile(db_structure, user_id, edit_user_profile){
 
 }
 
-async function get_user_info(db_structure, user_id){
+async function block_user(db_structure, user_id, blocked_user_id){
+
+    if(ObjectID(user_id).equals(ObjectID(blocked_user_id))){
+        return false //you can't block yourself
+    }
+
+    //checking whether relation already exists or not
+    const block_object = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.blocked_users).findOne({
+        user_id:ObjectID(user_id),
+        blocked_user_id:ObjectID(blocked_user_id),
+        status:"ACTIVE"
+    })
+
+    if(block_object){
+        return true
+    }
+
+    const block_res = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.blocked_users).insertOne({
+        user_id:ObjectID(user_id),
+        blocked_user_id:ObjectID(blocked_user_id),
+        status:"ACTIVE",
+        timestamp: new Date(),
+        last_modified: new Date()
+    })
+
+    return true
+}
+
+async function unblock_user(db_structure, user_id, blocked_user_id){
+
+    let result = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.blocked_users).findOneAndDelete(
+        {
+            user_id:ObjectID(user_id),
+            blocked_user_id:ObjectID(blocked_user_id)            
+        }
+    )
+
+    return true
+}
+
+async function get_blocked_users(db_structure, user_id){
+    
+    let blocked_users = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.blocked_users).find({
+        user_id:ObjectID(user_id),
+        status:"ACTIVE"
+    }).toArray()
+    
+    return blocked_users
+
+}
+
+async function get_user_info(db_structure, user_id, curr_user_id){
         //getting user info
         let user_info = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).aggregate([
             {$match: {user_id:ObjectID(user_id)}},
@@ -234,7 +285,25 @@ async function get_user_info(db_structure, user_id){
             throw new AuthenticationError("No such user exits")        
         }
 
-        return user_info[0]       
+        user_info = user_info[0]       
+
+        //checking whether user is blocked or not
+        if(ObjectID(user_id).equals(ObjectID(curr_user_id))){
+            user_info.is_blocked=false
+        }else{
+            const user_blocked = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.blocked_users).findOne({
+                user_id:ObjectID(curr_user_id),
+                blocked_user_id:ObjectID(user_id),
+                status:"ACTIVE"
+            })
+            if(user_blocked){
+                user_info.is_blocked=true
+            }else{
+                user_info.is_blocked=false
+            }
+        }
+
+        return user_info
 }
 
 async function check_email(db_structure, email){
@@ -366,6 +435,9 @@ module.exports = {
     login_user,
     get_user_info,
     edit_user_profile,
+    block_user,
+    unblock_user,
+    get_blocked_users,
 
     //registration checks
     check_email,

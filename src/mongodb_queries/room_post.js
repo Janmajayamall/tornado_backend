@@ -4,6 +4,7 @@ const {ObjectID} = require("mongodb")
 const mongodb_room_queries = require('./room')
 const {CLOUD_FRONT_URL} = require("./../utils/constants")
 const { get_user_info } = require("./user")
+const sgMail = require('@sendgrid/mail');
 
 async function create_room_post(db_structure, room_post_object){
     //create room_post_value for insert
@@ -1264,6 +1265,50 @@ async function get_user_profile_posts(db_structure, get_user_profile_posts_objec
 
 }
 
+async function report_post(db_structure, user_id, report_post_object){
+
+    const user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOne({_id:ObjectID(user_id)})
+    const user_email = user.email
+
+    const msg = {
+        from:{
+            "email":"tornado.helpdesk.in@gmail.com"
+         },
+        personalizations:[
+            {
+               to:[
+                    {
+                        email:"tornado.helpdesk.in@gmail.com"
+                    }
+               ],
+               dynamic_template_data:{
+                  user_email:user_email,
+                  post_id:report_post_object.post_id,
+                  reason:report_post_object.reason,
+                  timestamp:new Date().toUTCString()
+                }
+            }
+        ],
+        template_id:"d-3673f2c0fcb948229e73fbe4a87c078d" // template ID of the email
+    }
+
+
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    //sending the code to user's email id
+    try {
+        const response = await sgMail.send(msg);   
+        return true     
+    } catch (error) {
+        if (error.response) {
+            bugsnap_client.notify(error.response.body)
+            console.error(error.response.body,"password_recovery_send_code function | user.js" )
+        }
+        throw new ApolloError("Send grid Error", error)
+    } 
+
+}
+
 module.exports = {
 
     //mutations 
@@ -1274,5 +1319,8 @@ module.exports = {
     //queries
     get_room_posts_user_id,
     get_room_posts_room_id,
-    get_user_profile_posts
+    get_user_profile_posts,
+
+    //notifications
+    report_post
 }

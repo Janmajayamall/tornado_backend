@@ -34,6 +34,7 @@ module.exports = gql`
         bio:String,
         avatar:Image,
         default_avatar:Boolean!,
+        is_blocked:Boolean
     }
 
     # image type 
@@ -320,6 +321,22 @@ module.exports = gql`
         name_filter:String
     }
 
+    # blocked_user type
+    type Blocked_user {
+        _id:ID!,
+        user_id:ID!,
+        blocked_user_id:ID!,
+        status:String!,
+        timestamp:String!, 
+        last_modified:String!,
+    }
+
+    #mutation Report post input
+    input report_post_input {
+        post_id:ID!, 
+        reason:String!
+    }
+
     type Mutation {
 
         #user
@@ -327,6 +344,8 @@ module.exports = gql`
         login_user(user_input:login_user_input):User!,
         edit_user_profile(user_input:edit_user_profile_input):User_account!
         password_recovery_code_verification(verification_code:String!, password:String!):Boolean!
+        block_user(blocked_user_id:ID!):Boolean!
+        unblock_user(blocked_user_id:ID!):Boolean!
 
         #rooms
         create_room(user_input:room_input):Room_demographic!,
@@ -347,6 +366,7 @@ module.exports = gql`
         create_room_post(user_input:create_room_post_input):Room_post_feed!
         edit_room_post(_id:ID!, user_input:edit_room_post_input):Room_post!
         deactivate_room_post(post_id:ID!):ID!
+        report_post(user_input:report_post_input!):Boolean!
 
         #caption
         create_caption(user_input:create_caption_input):Caption!
@@ -363,6 +383,7 @@ module.exports = gql`
         get_room_posts_user_id(user_input:room_post_feed):Room_post_cursor,
         get_room_posts_room_id(user_input:room_details_feed):Room_post_cursor,
         get_user_profile_posts(user_input:get_user_profile_posts_input):Room_post_cursor,
+        get_blocked_users:[Blocked_user!]!,
 
         #comments
         get_post_comments(user_input:get_post_comments_input):[Comment_with_creator!]!

@@ -58,6 +58,23 @@ module.exports = {
             return result
         },
 
+        async report_post(parents, args, context){
+
+            //authenticating the user
+            const user_id = await verify_jwt(context.req_headers.authorization)
+
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+
+            const report_post_object = args.user_input
+            //TODO:validate the input
+            // validator_wrapper(objectid_validation(room_post_id))
+
+            const result = await mongodb_room_post_queries.report_post(context.db_structure, user_id, report_post_object)
+            return result
+            
+        }
+
     },
 
     Query:{
