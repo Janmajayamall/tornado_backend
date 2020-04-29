@@ -11,7 +11,11 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
-            const user_object = args.user_input
+            let user_object = {
+                ...args.user_input,
+                email:args.user_input.email.toLowerCase().trim()
+            }
+
             //Validate the args
             validation_result = user_register_validation(user_object)
             
@@ -32,7 +36,11 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
-            const user_object = args.user_input
+            const user_object = {
+                ...args.user_input,
+                email:args.user_input.email.toLowerCase().trim()
+            }
+
             //Validate the args
             validation_result = user_login_validation(user_object)
             if (!validation_result.valid){
@@ -68,7 +76,7 @@ module.exports = {
             //checking for db instance in the context
             db_instance_validation(context.db_structure.main_db)
 
-            //extracting email
+            //extracting input
             const change_password_object = {
                 password:args.password, 
                 verification_code:args.verification_code
@@ -155,7 +163,7 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             //extracting email id
-            const email = args.email
+            const email = args.email.toLowerCase().trim()
 
             if(!email){
                 throw new UserInputError("Error", {
@@ -180,7 +188,6 @@ module.exports = {
                 user_id = await verify_jwt(context.req_headers.authorization)
             }
             
-
             //extracting username
             const username = args.username
 
@@ -193,7 +200,7 @@ module.exports = {
             db_instance_validation(context.db_structure.main_db)
 
             //extracting email
-            const email = args.email
+            const email = args.email.toLowerCase().trim()
 
             const result = await mongodb_user_queries.password_recovery_send_code(context.db_structure, email)
             return result
