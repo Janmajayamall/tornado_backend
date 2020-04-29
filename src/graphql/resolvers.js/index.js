@@ -23,6 +23,7 @@ module.exports = {
         ...room_resolvers.Queries,
         ...aws_operations_resolvers.Query,
         ...user_resolvers.Query,
-        ...captions_resolvers.Query
+        ...captions_resolvers.Query,
+        ...like_resolvers.Queries,
     }
 }

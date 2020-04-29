@@ -37,6 +37,16 @@ module.exports = gql`
         is_blocked:Boolean
     }
 
+    #user account small info type
+    type User_account_small {
+        _id:ID!,
+        user_id:ID!,
+        username:String!, 
+        default_avatar:Boolean!,
+        avatar:Image,
+        is_user:Boolean!
+    }
+
     # image type 
     type Image {
         _id:ID!, 
@@ -396,6 +406,7 @@ module.exports = gql`
         get_common_rooms(user_ids:[ID!]!):[Room_demographic!]!
         get_room_demographics(room_id:ID!):Room_demographic!
         check_room_name(room_name:String!):Boolean!
+        get_room_members_list(room_id:ID!):[User_account_small!]!
 
         #aws s3 image upload access 
         get_image_upload_url(user_input:get_image_upload_url_input):String!
@@ -408,6 +419,9 @@ module.exports = gql`
 
         #captions
         get_post_captions(post_id:ID!):[Caption!]!
+
+        #likes
+        get_likes_list(content_id:ID!):[User_account_small!]!
 
     }   
 

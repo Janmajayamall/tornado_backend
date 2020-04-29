@@ -925,6 +925,66 @@ async function check_room_name(db_structure, room_name){
 
 }
 
+async function get_room_members_list(db_structure, user_id, room_id){
+
+    //get follow objects of the room
+    const room_follow_objects = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.room_follows).find({
+        room_id:ObjectID(room_id),
+        status:"ACTIVE"
+    }).toArray()
+    
+    //get user_ids
+    const user_ids = []
+    room_follow_objects.forEach(element=>{
+        user_ids.push(ObjectID(element.follower_id))
+    })
+
+    // getting type User_account_small for each account
+    let user_info_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).aggregate([
+        {$match: {user_id:{$in:user_ids}}},
+        {$lookup:{
+            from:db_structure.main_db.collections.images,
+            let:{image_id:"$avatar"},
+            pipeline:[
+                {$match:{
+                    $expr:{$eq:["$_id", "$$image_id"]}
+                }},
+                {$addFields:{
+                    cdn_url:CLOUD_FRONT_URL
+                }}
+            ],                        
+            as:"avatar_dev"
+        }},
+        {$addFields:{
+            avatar:{
+                $cond:{
+                    if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                    then:null,
+                    else:{$arrayElemAt: ["$avatar_dev", 0]}
+                }
+            },
+            is_user:{
+                $cond:{
+                    if: {$eq:[ObjectID(user_id), "$user_id"]},
+                    then:true, 
+                    else:false
+                }
+            }
+        }},
+        {$project:{
+            _id:1, 
+            user_id:1, 
+            username:1, 
+            default_avatar:1,
+            avatar:1,
+            is_user:1
+        }}
+    ]).toArray()
+
+    return user_info_list
+
+}
+
 module.exports = {
 
     //mutations
@@ -943,6 +1003,7 @@ module.exports = {
     get_all_created_rooms,
     get_common_rooms,
     get_room_demographics,
+    get_room_members_list,
 
     //room input extra checks
     check_room_name

@@ -27,5 +27,26 @@ module.exports = {
             
         }
 
+    },
+
+    Queries:{
+
+        async get_likes_list(parent, args, context){
+
+            //authenticating the user
+           const user_id = await verify_jwt(context.req_headers.authorization)
+            //checking for db instance in the context
+            db_instance_validation(context.db_structure.main_db)
+        
+            const content_id = args.content_id
+            
+            //Validate the input
+            validator_wrapper(objectid_validation(content_id))
+            
+            const result = await mongodb_like_queries.get_likes_list(context.db_structure, user_id, content_id)        
+            
+            return result
+        }
+
     }
 }

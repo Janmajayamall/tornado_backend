@@ -306,6 +306,58 @@ async function get_user_info(db_structure, user_id, curr_user_id){
         return user_info
 }
 
+async function get_user_info_small_list(db_structure, user_id, user_ids){
+
+    // converting string ids to objectids
+    const user_object_ids = []
+    user_ids.forEach(element => {
+        user_object_ids.push(ObjectID(element))
+    });
+
+    let user_info_list = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.user_accounts).aggregate([
+        {$match: {user_id:{$in:user_object_ids}}},
+        {$lookup:{
+            from:db_structure.main_db.collections.images,
+            let:{image_id:"$avatar"},
+            pipeline:[
+                {$match:{
+                    $expr:{$eq:["$_id", "$$image_id"]}
+                }},
+                {$addFields:{
+                    cdn_url:CLOUD_FRONT_URL
+                }}
+            ],                        
+            as:"avatar_dev"
+        }},
+        {$addFields:{
+            avatar:{
+                $cond:{
+                    if:{$eq:[{$size:"$avatar_dev"}, 0]},
+                    then:null,
+                    else:{$arrayElemAt: ["$avatar_dev", 0]}
+                }
+            },
+            is_user:{
+                $cond:{
+                    if: {$eq:[ObjectID(user_id), "$user_id"]},
+                    then:true, 
+                    else:false
+                }
+            }
+        }},
+        {$project:{
+            _id:1, 
+            user_id:1, 
+            username:1, 
+            default_avatar:1,
+            avatar:1,
+            is_user:1
+        }}
+    ]).toArray()
+
+    return user_info_list
+}
+
 async function check_email(db_structure, email){
 
     const user = await db_structure.main_db.db_instance.collection(db_structure.main_db.collections.users).findOne({email:email})
@@ -438,6 +490,7 @@ module.exports = {
     block_user,
     unblock_user,
     get_blocked_users,
+    get_user_info_small_list,
 
     //registration checks
     check_email,
